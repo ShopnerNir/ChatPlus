@@ -1,15 +1,15 @@
-
 <!DOCTYPE html>
 <html lang="bn">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ChatPlus - Premium Messaging App</title>
+    <title>ChatPlus - Premium</title>
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
 
+    <!-- ১. স্প্ল্যাশ স্ক্রিন -->
     <div id="splash-screen" class="screen active">
         <div class="splash-content">
             <i class="fab fa-whatsapp splash-logo"></i>
@@ -18,6 +18,7 @@
         </div>
     </div>
 
+    <!-- ২. লগইন পেজ -->
     <div id="login-screen" class="screen">
         <div class="login-card">
             <h2>Welcome to ChatPlus</h2>
@@ -37,52 +38,40 @@
         <div class="developer-credit">Developed by UTSAB SARKER</div>
     </div>
 
+    <!-- ৩. মূল ড্যাশবোর্ড -->
     <div id="main-dashboard" class="screen">
         <div class="app-container">
-            
             <aside class="sidebar">
                 <header class="sidebar-header">
-                    <div class="user-profile" id="open-my-profile">
+                    <div class="user-profile" id="btn-my-profile">
                         <img src="https://via.placeholder.com/40" id="my-avatar" alt="Profile">
                         <span id="my-username">Loading...</span>
                     </div>
                     <div class="header-actions">
-                        <button id="btn-admin-panel" class="hidden" title="Admin Panel"><i class="fas fa-user-shield"></i></button>
-                        <button id="btn-settings" title="Settings"><i class="fas fa-key"></i></button>
-                        <button id="btn-logout" title="Logout"><i class="fas fa-sign-out-alt"></i></button>
+                        <button id="btn-admin-panel" class="hidden"><i class="fas fa-user-shield"></i></button>
+                        <button id="btn-logout"><i class="fas fa-sign-out-alt"></i></button>
                     </div>
                 </header>
-                
                 <div class="search-box">
                     <i class="fas fa-search"></i>
-                    <input type="text" id="search-chats" placeholder="Search chats or groups...">
+                    <input type="text" id="search-chats" placeholder="Search chats...">
                 </div>
-
-                <div class="chat-list" id="chat-list-container">
-                    </div>
+                <div class="chat-list" id="chat-list-container"></div>
             </aside>
 
-            <main class="chat-window" id="chat-window">
+            <main class="chat-window">
                 <header class="chat-header">
                     <button id="btn-back-to-list" class="back-btn"><i class="fas fa-arrow-left"></i></button>
-                    
                     <div class="active-chat-user" id="active-chat-info">
                         <h4>Select a chat to start messaging</h4>
                     </div>
                 </header>
-
-                <div class="message-area" id="message-container">
-                    </div>
-
+                <div class="message-area" id="message-container"></div>
                 <footer class="chat-footer">
                     <div class="attachment-buttons">
-                        <label for="media-input" class="attach-btn" title="Image/Video"><i class="fas fa-image"></i></label>
+                        <label for="media-input" class="attach-btn"><i class="fas fa-camera"></i></label>
                         <input type="file" id="media-input" accept="image/*,video/*" style="display:none;">
-                        
-                        <label for="file-input" class="attach-btn" title="Any File"><i class="fas fa-paperclip"></i></label>
-                        <input type="file" id="file-input" style="display:none;">
                     </div>
-                    
                     <div class="input-wrapper">
                         <input type="text" id="msg-input" placeholder="Type a message...">
                     </div>
@@ -92,55 +81,49 @@
         </div>
     </div>
 
-    <div id="settings-modal" class="modal">
-        <div class="modal-content">
-            <h3>Change Password</h3>
-            <input type="password" id="new-pass" placeholder="New Password" required>
+    <!-- ৪. প্রোফাইল এডিট মডাল -->
+    <div id="profile-modal" class="modal">
+        <div class="modal-content admin-box">
+            <h3>Edit My Profile</h3>
+            <hr>
+            <label class="file-upload-label">
+                <i class="fas fa-user-circle"></i> Upload New Profile Pic
+                <input type="file" id="edit-my-pic" accept="image/*">
+            </label>
+            <div id="my-pic-status" class="upload-status">No file chosen</div>
+            <input type="password" id="change-my-pass" placeholder="New Password (Optional)">
             <div class="modal-actions">
-                <button class="btn-cancel" id="close-settings">Cancel</button>
-                <button class="btn-save" id="save-password">Save</button>
+                <button class="btn-cancel" id="close-profile">Cancel</button>
+                <button class="btn-save" id="btn-save-profile">Save Changes</button>
             </div>
         </div>
     </div>
 
+    <!-- ৫. এডমিন প্যানেল মডাল -->
     <div id="admin-modal" class="modal">
         <div class="modal-content admin-box">
             <h3>Admin Panel</h3>
             <hr>
-            
-            <h4>Create New User</h4>
+            <h4>Create User</h4>
             <input type="text" id="new-user-name" placeholder="Full Name">
-            <input type="text" id="new-user-username" placeholder="Username (Lowercase)">
-            <input type="password" id="new-user-pass" placeholder="Initial Password">
-            
+            <input type="text" id="new-user-username" placeholder="Username">
+            <input type="password" id="new-user-pass" placeholder="Password">
             <label class="file-upload-label">
-                <i class="fas fa-camera"></i> Upload User Profile Pic
+                <i class="fas fa-image"></i> Choose Profile Pic
                 <input type="file" id="new-user-pic" accept="image/*">
             </label>
             <div id="user-pic-status" class="upload-status">No file chosen</div>
-            
             <button class="btn-save" id="btn-create-user">Create User</button>
-            
             <hr>
-            
-            <h4>Create New Group</h4>
+            <h4>Create Group</h4>
             <input type="text" id="group-name" placeholder="Group Name">
-            
             <label class="file-upload-label">
-                <i class="fas fa-image"></i> Upload Group Pic
+                <i class="fas fa-users"></i> Group Pic
                 <input type="file" id="group-pic" accept="image/*">
             </label>
             <div id="group-pic-status" class="upload-status">No file chosen</div>
-
-            <label class="file-upload-label">
-                <i class="fas fa-wallpaper"></i> Upload Group Background Theme
-                <input type="file" id="group-bg" accept="image/*">
-            </label>
-            <div id="group-bg-status" class="upload-status">No file chosen</div>
-
-            <input type="text" id="group-members" placeholder="Usernames (comma separated: rony,sajib)">
+            <input type="text" id="group-members" placeholder="Members (comma separated: rony,sajib)">
             <button class="btn-save" id="btn-create-group">Create Group</button>
-            
             <hr>
             <button class="btn-cancel" id="close-admin">Close</button>
         </div>
@@ -149,7 +132,7 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
-    
     <script src="app.js"></script>
 </body>
 </html>
+
