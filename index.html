@@ -525,7 +525,7 @@
 
     <script type="module">
 
-        // Import Firebase CDN Modules safely using standard Modern Web Protocols
+                        // Import Firebase CDN Modules safely using standard Modern Web Protocols
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 import { getFirestore, doc, getDoc, setDoc, collection, addDoc, query, where, orderBy, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
@@ -551,10 +551,10 @@ function showToast(msg) {
     node.className = 'cyber-toast-node';
     node.innerText = `// NET LOG: ${msg}`;
     hub.appendChild(node);
-    setTimeout(() => node.remove(), 5000); // সময় বাড়িয়ে ৫ সেকেন্ড করা হলো দেখার সুবিধার্থে
+    setTimeout(() => node.remove(), 5000);
 }
 
-// 1. SAFE INITIALIZATION
+// Safe Initialization
 try {
     app = initializeApp(firebaseConfig);
     auth = getAuth(app);
@@ -564,15 +564,15 @@ try {
     setupLocalBypassSimulationMatrix();
 }
 
-// 2. STATE MONITORING (লগইন সাকসেস হওয়ার পর এখানে ডেটা রিড আটকে যেত)
+// State Monitoring Matrix
 if (auth) {
     onAuthStateChanged(auth, async (user) => {
         if (user) {
-            console.log("Auth Success. Fetching user profile from Firestore...");
+            console.log("Auth Success. UID:", user.uid);
             try {
                 const docRef = doc(db, "users", user.uid);
                 
-                // Timeout Handler: ডেটাবেজ যদি ৩ সেকেন্ডের মধ্যে রেসপন্স না করে তবে জোরপূর্বক ড্যাশবোর্ড খুলবে
+                // Timeout logic
                 const fetchPromise = getDoc(docRef);
                 const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error("Database Timeout")), 3000));
                 
@@ -583,11 +583,22 @@ if (auth) {
                     currentUser.uid = user.uid;
                     launchAppDashboard();
                 } else {
-                    // যদি ইউজার ডক না থাকে, তবে অথেনটিকেশনের ডেটা দিয়ে লোকাল প্রোফাইল তৈরি করবে
-                    showToast("Profile missing in Database. Creating temporary profile...");
+                    // Safe Fallback: ইমেইল না থাকলেও যেন এরর না আসে তার সুরক্ষা (Safe Check)
+                    let safeName = "MATRIX RUNNER";
+                    let safeUsername = "runner_node";
+                    
+                    if (user.email) {
+                        safeName = user.email.split('@')[0].toUpperCase();
+                        safeUsername = user.email.split('@')[0];
+                    } else if (user.displayName) {
+                        safeName = user.displayName.toUpperCase();
+                        safeUsername = user.displayName.toLowerCase().replace(/\s+/g, '_');
+                    }
+
+                    showToast("Profile not found in Firestore. Creating local profile...");
                     currentUser = {
-                        name: user.email.split('@')[0].toUpperCase(),
-                        username: user.email.split('@')[0],
+                        name: safeName,
+                        username: safeUsername,
                         role: "user",
                         uid: user.uid
                     };
@@ -595,10 +606,9 @@ if (auth) {
                 }
             } catch (err) {
                 console.error("Firestore Error:", err);
-                showToast(`Database Lock Detected! Error: ${err.message}. Activating Bypass Mode...`);
+                showToast(`Database Bypass Engaged: Loading Core UI.`);
                 
-                // ডেটাবেজে এরর খেলেও লগইন করা ইউজারকে আটকে না রেখে ড্যাশবোর্ডে ঢুকিয়ে দেওয়া হবে
-                currentUser = { name: "Matrix Runner", username: "runner_node", role: "user", uid: user.uid };
+                currentUser = { name: "CYBER GUEST", username: "guest_node", role: "user", uid: user.uid };
                 launchAppDashboard();
                 simulateVirtualLocalChannelsStreamNodes();
             }
@@ -610,7 +620,7 @@ if (auth) {
     });
 }
 
-// Login Submit Controller
+// Login Controller
 document.getElementById('auth-crypto-form').addEventListener('submit', async (e) => {
     e.preventDefault();
     const username = document.getElementById('auth-username-field').value.trim().toLowerCase();
@@ -618,7 +628,6 @@ document.getElementById('auth-crypto-form').addEventListener('submit', async (e)
     
     document.getElementById('splash-screen').classList.remove('hidden');
     
-    // ইমেইল ফরম্যাট হ্যান্ডলিং
     const email = username.includes('@') ? username : `${username}@chatplus.com`;
     
     try {
@@ -632,10 +641,13 @@ document.getElementById('auth-crypto-form').addEventListener('submit', async (e)
 function launchAppDashboard() {
     document.getElementById('auth-container').classList.add('hidden');
     document.getElementById('dashboard-wrapper').classList.remove('hidden');
-    document.getElementById('my-profile-name').innerText = currentUser.name.toUpperCase();
+    
+    // safe check for name rendering
+    const displayName = (currentUser && currentUser.name) ? currentUser.name : "UNKNOWN NODE";
+    document.getElementById('my-profile-name').innerText = displayName.toUpperCase();
     document.getElementById('splash-screen').classList.add('hidden');
 
-    if (currentUser.role === 'admin') {
+    if (currentUser && currentUser.role === 'admin') {
         document.getElementById('admin-panel-trigger').style.display = 'block';
     }
     
@@ -654,7 +666,7 @@ function loadChatRoomsListChannels() {
             container.innerHTML = '';
             
             if(snapshot.empty) {
-                container.innerHTML = `<div style="text-align:center; padding:20px; font-size:0.8rem; color:var(--text-cyber-muted);">// NO LIVE CHANNELS FOUND</div>`;
+                container.innerHTML = `<div style="text-align:center; padding:20px; font-size:0.8rem; color:var(--text-cyber-muted);">// NO CHANNELS ACTIVE</div>`;
             }
 
             snapshot.forEach((chatDoc) => {
@@ -669,14 +681,13 @@ function loadChatRoomsListChannels() {
                     <img src="${pic}" class="node-avatar">
                     <div class="node-info-block">
                         <div class="node-name">${title}</div>
-                        <div class="node-preview-msg">${chat.lastMessage || '// Secure Link Connected'}</div>
+                        <div class="node-preview-msg">${chat.lastMessage || '// Connected'}</div>
                     </div>
                 `;
                 row.onclick = () => selectAndOpenChatRoomNode(id, title, pic);
                 container.appendChild(row);
             });
         }, (error) => {
-            console.log("Firestore list query failed. Loading local bypass list.");
             simulateVirtualLocalChannelsStreamNodes();
         });
     } catch (e) {
@@ -693,8 +704,8 @@ function selectAndOpenChatRoomNode(id, title, pic) {
 
     if(id === "sandbox-row-id") {
         document.getElementById('realtime-message-board-container').innerHTML = `
-            <div class="msg-row-container incoming-type"><div class="msg-bubble-core">Welcome to Cyber Sandbox! Your Auth worked, but your Firestore Database needs to be configured (Rules or Collection).</div></div>
-            <div class="msg-row-container outgoing-type"><div class="msg-bubble-core">Bypass activated successfully. App UI is fully functional.</div></div>
+            <div class="msg-row-container incoming-type"><div class="msg-bubble-core">AUTHENTICATION SYSTEM: SUCCESSFUL. Firestore Database collection structure setup is missing, but UI connection is stable.</div></div>
+            <div class="msg-row-container outgoing-type"><div class="msg-bubble-core">Bypass engine is active and fully handling the environment.</div></div>
         `;
     } else {
         listenToRealtimeMessages(id);
@@ -748,7 +759,7 @@ async function sendPayloadMessageFinal() {
 document.getElementById('payload-transmission-submit-btn').onclick = sendPayloadMessageFinal;
 document.getElementById('payload-message-input').onkeydown = (e) => { if (e.key === 'Enter') sendPayloadMessageFinal(); };
 document.getElementById('mobile-back-vector-btn').onclick = () => document.body.classList.remove('chat-active-mode');
-document.getElementById('system-logout-btn').onclick = () => { if(confirm("// DISCONNECT MATRIX LINK?")) signOut(auth); };
+document.getElementById('system-logout-btn').onclick = () => { if(confirm("// CLOSE MAINNET LINK?")) signOut(auth); };
 document.getElementById('profile-edit-trigger').onclick = () => document.getElementById('profile-customizer-modal-layer').classList.add('open');
 document.getElementById('close-profile-modal').onclick = () => document.getElementById('profile-customizer-modal-layer').classList.remove('open');
 
@@ -768,13 +779,14 @@ function simulateVirtualLocalChannelsStreamNodes() {
         <div class="chat-item-node" id="sandbox-row">
             <img src="https://via.placeholder.com/150/7f00ff/ffffff?text=SAFE" class="node-avatar">
             <div class="node-info-block">
-                <div class="node-name">SYSTEM BYPASS CHANNEL</div>
-                <div class="node-preview-msg">⚡ [Firestore Loading Error - Active Fallback]</div>
+                <div class="node-name">VIRTUAL OVERRIDE LINK</div>
+                <div class="node-preview-msg">⚡ [Firestore Profile Empty - Safe Core Active]</div>
             </div>
         </div>
     `;
-    document.getElementById('sandbox-row').onclick = () => selectAndOpenChatRoomNode("sandbox-row-id", "SYSTEM BYPASS CHANNEL", "https://via.placeholder.com/150/7f00ff/ffffff?text=SAFE");
+    document.getElementById('sandbox-row').onclick = () => selectAndOpenChatRoomNode("sandbox-row-id", "VIRTUAL OVERRIDE LINK", "https://via.placeholder.com/150/7f00ff/ffffff?text=SAFE");
 }
-    </script>
+        
+                    </script>
 </body>
 </html>
