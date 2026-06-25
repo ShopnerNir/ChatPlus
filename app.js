@@ -18,14 +18,41 @@ const db = firebase.firestore();
 const CLOUDINARY_URL = "https://api.cloudinary.com/v1_1/zx82me8y/upload";
 const CLOUDINARY_PRESET = "ChatPlus"; 
 
-// গ্লোবাল ভ্যারিয়েবলস
+// গ্লোবাল ভেরিয়েবল
 let currentUser = null;
 let currentChatId = null;
-let currentChatType = null; // 'direct' অথবা 'group'
 let unsubscribeMessages = null;
 
 // ==========================================
-// ২. পেজ ফ্লো ও লোডিং (Splash Screen)
+// ২. ক্লাউডিনারি ফাইল আপলোড ইঞ্জিন (সার্বজনীন)
+// ==========================================
+async function uploadToCloudinary(file) {
+    if (!file) return null;
+    if (file.size > 50 * 1024 * 1024) { // ৫০ এমবি লক
+        alert("ফাইল সাইজ ৫০ এমবির বেশি হতে পারবে না!");
+        return null;
+    }
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("upload_preset", CLOUDINARY_PRESET);
+    
+    try {
+        const res = await fetch(CLOUDINARY_URL, { method: "POST", body: formData });
+        const data = await res.json();
+        return data.secure_url;
+    } catch (err) {
+        console.error("Cloudinary Error:", err);
+        return null;
+    }
+}
+
+// ইনপুট ফাইলগুলোর নাম দেখানোর লজিক
+document.getElementById("new-user-pic").onchange = (e) => document.getElementById("user-pic-status").innerText = e.target.files[0].name;
+document.getElementById("group-pic").onchange = (e) => document.getElementById("group-pic-status").innerText = e.target.files[0].name;
+document.getElementById("group-bg").onchange = (e) => document.getElementById("group-bg-status").innerText = e.target.files[0].name;
+
+// ==========================================
+// ৩. পেজ ফ্লো ও সেশন হ্যান্ডলিং
 // ==========================================
 document.addEventListener("DOMContentLoaded", () => {
     setTimeout(() => {
@@ -37,18 +64,13 @@ document.addEventListener("DOMContentLoaded", () => {
                 document.getElementById("login-screen").classList.add("active");
             }
         });
-    }, 3000); // ৩ সেকেন্ড পর লোডিং পেজ চলে যাবে
+    }, 3000);
 });
 
-// ==========================================
-// ৩. ইউজারনেম দিয়ে লগইন প্রসেস
-// ==========================================
 document.getElementById("login-form").addEventListener("submit", (e) => {
     e.preventDefault();
     const username = document.getElementById("username").value.trim().toLowerCase();
     const pass = document.getElementById("password").value;
-    
-    // ইউজারনেমকে ভার্চুয়াল ইমেইলে কনভার্ট করা (১০-১২ জনের জন্য সেরা সলিউশন)
     const email = `${username}@chatplus.com`;
 
     auth.signInWithEmailAndPassword(email, pass)
@@ -59,7 +81,6 @@ document.getElementById("login-form").addEventListener("submit", (e) => {
     .catch(err => alert("ভুল ইউজারনেম অথবা পাসওয়ার্ড!"));
 });
 
-// ইউজার ডাটা লোড করা
 function loadUserProfile(uid) {
     db.collection("users").doc(uid).get().then(doc => {
         if(doc.exists) {
@@ -67,30 +88,21 @@ function loadUserProfile(uid) {
             currentUser.uid = uid;
             
             document.getElementById("my-username").innerText = currentUser.name;
-            if(currentUser.profilePic) {
-                document.getElementById("my-avatar").src = currentUser.profilePic;
-            }
-            
-            // যদি এডমিন লগইন করে তবে এডমিন বাটন দেখানো
-            if(currentUser.role === 'admin') {
-                document.getElementById("btn-admin-panel").classList.remove("hidden");
-            }
+            if(currentUser.profilePic) document.getElementById("my-avatar").src = currentUser.profilePic;
+            if(currentUser.role === 'admin') document.getElementById("btn-admin-panel").classList.remove("hidden");
 
-            // অনলাইন স্ট্যাটাস সেট করা
             db.collection("users").doc(uid).update({ status: "online" });
-            
             document.getElementById("main-dashboard").classList.add("active");
             loadChatList();
-            autoDeleteOldMessages(); // ৩০ দিনের পুরনো মেসেজ ডিলিট ট্রিগার
+            autoDeleteOldMessages();
         }
     });
 }
 
 // ==========================================
-// ৪. চ্যাট লিস্ট লোড করা (ডাইনামিক)
+// ৪. চ্যাট লিস্ট ইঞ্জিন
 // ==========================================
 function loadChatList() {
-    // ডাইরেক্ট চ্যাট এবং গ্রুপ চ্যাট দুটোই একসাথে রিয়েল-টাইমে নজর রাখা
     db.collection("chats").onSnapshot(snapshot => {
         const container = document.getElementById("chat-list-container");
         container.innerHTML = "";
@@ -99,15 +111,12 @@ function loadChatList() {
             const chat = doc.data();
             chat.id = doc.id;
             
-            // পারমিশন চেক: ইউজার এই চ্যাট দেখার যোগ্য কিনা
             if (currentUser.role === 'admin' || chat.members.includes(currentUser.username)) {
                 let chatName = chat.name || "Direct Chat";
                 let chatPic = chat.pic || "https://via.placeholder.com/45";
                 
-                // ডাইরেক্ট চ্যাটের ক্ষেত্রে অন্য ইউজারের নাম ও ছবি দেখানো
                 if(chat.type === 'direct') {
-                    const otherUser = chat.members.find(m => m !== currentUser.username);
-                    chatName = otherUser;
+                    chatName = chat.members.find(m => m !== currentUser.username);
                 }
 
                 const item = document.createElement("div");
@@ -132,25 +141,19 @@ function loadChatList() {
 }
 
 // ==========================================
-// ৫. চ্যাট উইন্ডো ওপেন এবং মেসেজ লোড
+// ৫. চ্যাট উইন্ডো ওপেন এবং মেসেজ স্ট্রিমিং
 // ==========================================
 function openChat(chat) {
     currentChatId = chat.id;
-    currentChatType = chat.type;
-    
     let chatName = chat.name;
     let chatPic = chat.pic || "https://via.placeholder.com/45";
+    
     if(chat.type === 'direct') {
         chatName = chat.members.find(m => m !== currentUser.username);
     }
 
-    // ব্যাকগ্রাউন্ড থিম সেট করা
     const msgContainer = document.getElementById("message-container");
-    if(chat.backgroundTheme) {
-        msgContainer.style.backgroundImage = `url('${chat.backgroundTheme}')`;
-    } else {
-        msgContainer.style.backgroundImage = "url('https://w0.peakpx.com/wallpaper/508/606/HD-wallpaper-whatsapp-background-patterns-texture.jpg')";
-    }
+    msgContainer.style.backgroundImage = chat.backgroundTheme ? `url('${chat.backgroundTheme}')` : "url('https://w0.peakpx.com/wallpaper/508/606/HD-wallpaper-whatsapp-background-patterns-texture.jpg')";
 
     document.getElementById("active-chat-info").innerHTML = `
         <img src="${chatPic}">
@@ -160,10 +163,10 @@ function openChat(chat) {
         </div>
     `;
 
-    // আগের মেসেজ লিসেনার বন্ধ করা
+    document.querySelector(".app-container").classList.add("chat-open"); // মোবাইল ট্রিকস
+
     if(unsubscribeMessages) unsubscribeMessages();
 
-    // মেসেজ রিয়েল-টাইম লোড করা
     unsubscribeMessages = db.collection("messages")
         .where("chatId", "==", currentChatId)
         .orderBy("timestamp", "asc")
@@ -182,24 +185,24 @@ function openChat(chat) {
                 } else if (msg.mediaUrl) {
                     if(msg.mediaType === 'image') msgContent = `<img src="${msg.mediaUrl}" style="max-width:200px; border-radius:5px;"><p>${msg.text}</p>`;
                     else if(msg.mediaType === 'video') msgContent = `<video src="${msg.mediaUrl}" controls style="max-width:200px;"></video><p>${msg.text}</p>`;
-                    else msgContent = `<a href="${msg.mediaUrl}" target="_blank"><i class="fas fa-file"></i> View Attachment</a><p>${msg.text}</p>`;
+                    else msgContent = `<a href="${msg.mediaUrl}" target="_blank" style="color:var(--primary);"><i class="fas fa-file"></i> View File</a><p>${msg.text}</p>`;
                 }
 
                 const timeStr = msg.timestamp ? new Date(msg.timestamp.toDate()).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : '';
 
                 msgDiv.innerHTML = `
-                    <div class="msg-bubble" id="msg-${msg.id}">
-                        ${msg.senderId !== currentUser.username && chat.type === 'group' ? `<small style="color:var(--primary); font-weight:bold;">${msg.senderId}</small>` : ''}
+                    <div class="msg-bubble">
+                        ${msg.senderId !== currentUser.username && chat.type === 'group' ? `<small style="color:var(--primary); font-weight:bold; display:block; margin-bottom:2px;">@${msg.senderId}</small>` : ''}
                         ${msgContent}
                         <span class="msg-time">${timeStr} ${msg.isEdited ? '(Edited)' : ''}</span>
                     </div>
                 `;
 
-                // ১০ মিনিটের ভিতর লং প্রেস/রাইট ক্লিকে মেসেজ এডিট লজিক এবং এডমিন ডিলিট পাওয়ার
-                msgDiv.addEventListener("contextmenu", (e) => {
-                    e.preventDefault();
-                    handleMessageOptions(msg);
+                msgDiv.addEventListener("contextmenu", (e) => { e.preventDefault(); handleMessageOptions(msg); });
+                msgDiv.addEventListener("touchstart", (e) => { 
+                    window.touchTimer = setTimeout(() => handleMessageOptions(msg), 800); 
                 });
+                msgDiv.addEventListener("touchend", () => clearTimeout(window.touchTimer));
 
                 msgContainer.appendChild(msgDiv);
             });
@@ -208,7 +211,7 @@ function openChat(chat) {
 }
 
 // ==========================================
-// ৬. মেসেজ পাঠানো এবং মিডিয়া আপলোড (Cloudinary)
+// ৬. মেসেজ পাঠানো (মিডিয়াসহ)
 // ==========================================
 document.getElementById("btn-send").onclick = () => sendTrigger();
 document.getElementById("msg-input").onkeypress = (e) => { if(e.key === 'Enter') sendTrigger(); };
@@ -226,19 +229,8 @@ async function sendTrigger() {
     let mediaType = null;
 
     if(fileToUpload) {
-        if (fileToUpload.size > 50 * 1024 * 1024) { // 50MB Limit
-            alert("ফাইল সাইজ ৫০ এমবির বেশি!");
-            return;
-        }
-        // Cloudinary আপলোড
-        const formData = new FormData();
-        formData.append("file", fileToUpload);
-        formData.append("upload_preset", CLOUDINARY_PRESET);
-        
-        const res = await fetch(CLOUDINARY_URL, { method: "POST", body: formData });
-        const fileData = await res.json();
-        mediaUrl = fileData.secure_url;
-        mediaType = fileToUpload.type.split('/')[0];
+        mediaUrl = await uploadToCloudinary(fileToUpload);
+        mediaType = fileToUpload.type.split('/')[0] || 'file';
     }
 
     const msgData = {
@@ -258,94 +250,104 @@ async function sendTrigger() {
         lastMsgTime: firebase.firestore.FieldValue.serverTimestamp()
     });
 
-    // ইনপুট রিসেট
     document.getElementById("media-input").value = "";
     document.getElementById("file-input").value = "";
 }
 
-// ==========================================
-// ৭. মেসেজ এডিট (১০ মিনিট) ও এডমিন ডিলিট অপশন
-// ==========================================
 function handleMessageOptions(msg) {
     if(msg.isDeletedByAdmin) return;
-
-    const timeDiff = (Date.now() - msg.timestamp.toDate().getTime()) / 1000 / 60; // Minutes
+    const timeDiff = (Date.now() - msg.timestamp.toDate().getTime()) / 1000 / 60;
 
     if(currentUser.role === 'admin') {
-        if(confirm("এডমিন হিসেবে এই মেসেজটি ডিলিট করতে চান?")) {
+        if(confirm("এডমিন প্যানেল: এই মেসেজটি ডিলিট করতে চান?")) {
             db.collection("messages").doc(msg.id).update({ isDeletedByAdmin: true });
         }
     } else if (msg.senderId === currentUser.username && timeDiff <= 10) {
-        const newText = prompt("আপনার মেসেজটি এডিট করুন:", msg.text);
-        if(newText) {
-            db.collection("messages").doc(msg.id).update({ text: newText, isEdited: true });
-        }
+        const newText = prompt("মেসেজটি এডিট করুন:", msg.text);
+        if(newText) db.collection("messages").doc(msg.id).update({ text: newText, isEdited: true });
     }
 }
 
 // ==========================================
-// ৮. এডমিন অ্যাকশন (ইউজার এবং গ্রুপ তৈরি)
+// ৭. এডমিন প্যানেল ইঞ্জিন (সরাসরি আপলোড লজিক)
 // ==========================================
 document.getElementById("btn-create-user").onclick = async () => {
     const name = document.getElementById("new-user-name").value;
     const username = document.getElementById("new-user-username").value.trim().toLowerCase();
     const pass = document.getElementById("new-user-pass").value;
-    const pic = document.getElementById("new-user-pic").value || "https://via.placeholder.com/45";
+    const picFile = document.getElementById("new-user-pic").files[0];
 
     if(!name || !username || !pass) return alert("সব ঘর পূরণ করুন!");
 
+    let uploadedPicUrl = "https://via.placeholder.com/45"; // ডিফল্ট
+
+    if(picFile) {
+        alert("প্রোফাইল ছবি আপলোড হচ্ছে, দয়া করে অপেক্ষা করুন...");
+        uploadedPicUrl = await uploadToCloudinary(picFile);
+    }
+
     try {
-        // একটি সেকেন্ডারি ফায়ারবেস অ্যাপ দিয়ে ইউজার তৈরি করা (যাতে কারেন্ট এডমিন লগআউট না হয়ে যায়)
-        const secondaryApp = firebase.initializeApp(firebaseConfig, "Secondary");
+        const secondaryApp = firebase.initializeApp(firebaseConfig, "SecondaryEngine");
         const userCredential = await secondaryApp.auth().createUserWithEmailAndPassword(`${username}@chatplus.com`, pass);
         
         await db.collection("users").doc(userCredential.user.uid).set({
             name: name,
             username: username,
             role: "user",
-            profilePic: pic,
+            profilePic: uploadedPicUrl,
             status: "offline"
         });
 
-        // অটোমেটিক প্রথম একটি ডাইরেক্ট চ্যাট অবজেক্ট তৈরি করা এডমিনের সাথে
         await db.collection("chats").add({
             type: "direct",
             members: [currentUser.username, username],
-            lastMessage: "Chat Started",
+            lastMessage: "Chat Setup Complete",
             lastMsgTime: firebase.firestore.FieldValue.serverTimestamp()
         });
 
-        alert("নতুন মেম্বার সফলভাবে তৈরি হয়েছে!");
+        alert(`সফলভাবে ${username} অ্যাকাউন্ট তৈরি হয়েছে!`);
+        document.getElementById("admin-modal").classList.remove("active");
         secondaryApp.delete();
     } catch(err) { alert("Error: " + err.message); }
 };
 
-document.getElementById("btn-create-group").onclick = () => {
+document.getElementById("btn-create-group").onclick = async () => {
     const gName = document.getElementById("group-name").value;
-    const gPic = document.getElementById("group-pic").value;
-    const gBg = document.getElementById("group-bg").value;
+    const gPicFile = document.getElementById("group-pic").files[0];
+    const gBgFile = document.getElementById("group-bg").files[0];
     const membersList = document.getElementById("group-members").value.split(",").map(m => m.trim());
     
-    membersList.push(currentUser.username); // এডমিনকে গ্রুপে যুক্ত করা
+    if(!gName) return alert("গ্রুপের নাম দিন!");
+    alert("গ্রুপের মিডিয়া আপলোড হচ্ছে, অপেক্ষা করুন...");
+
+    let gPicUrl = "https://via.placeholder.com/45";
+    let gBgUrl = null;
+
+    if(gPicFile) gPicUrl = await uploadToCloudinary(gPicFile);
+    if(gBgFile) gBgUrl = await uploadToCloudinary(gBgFile);
+    
+    membersList.push(currentUser.username); 
 
     db.collection("chats").add({
         name: gName,
-        pic: gPic,
-        backgroundTheme: gBg,
+        pic: gPicUrl,
+        backgroundTheme: gBgUrl,
         type: "group",
         members: membersList,
-        lastMessage: "Group Created",
+        lastMessage: "Welcome To New Group",
         lastMsgTime: firebase.firestore.FieldValue.serverTimestamp()
-    }).then(() => alert("গ্রুপ সফলভাবে তৈরি হয়েছে!"));
+    }).then(() => {
+        alert("গ্রুপ তৈরি সম্পন্ন!");
+        document.getElementById("admin-modal").classList.remove("active");
+    });
 };
 
 // ==========================================
-// ৯. ৩০ দিন পর অটো ডিলিট লজিক (Client Trigger)
+// ৮. উইটিলিটি ও অটো ক্লিনার
 // ==========================================
 function autoDeleteOldMessages() {
     const thirtyDaysAgo = new Date();
     thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-
     db.collection("messages").where("timestamp", "<", thirtyDaysAgo).get().then(snapshot => {
         let batch = db.batch();
         snapshot.forEach(doc => batch.delete(doc.ref));
@@ -353,9 +355,7 @@ function autoDeleteOldMessages() {
     });
 }
 
-// ==========================================
-// ১০. মডাল ওপেন/ক্লোজ এবং লগআউট কন্ট্রোল
-// ==========================================
+document.getElementById("btn-back-to-list").onclick = () => document.querySelector(".app-container").classList.remove("chat-open");
 document.getElementById("btn-settings").onclick = () => document.getElementById("settings-modal").classList.add("active");
 document.getElementById("close-settings").onclick = () => document.getElementById("settings-modal").classList.remove("active");
 document.getElementById("btn-admin-panel").onclick = () => document.getElementById("admin-modal").classList.add("active");
@@ -364,7 +364,7 @@ document.getElementById("close-admin").onclick = () => document.getElementById("
 document.getElementById("save-password").onclick = () => {
     const newPass = document.getElementById("new-pass").value;
     auth.currentUser.updatePassword(newPass)
-        .then(() => { alert("পাসওয়ার্ড পরিবর্তন সফল!"); document.getElementById("settings-modal").classList.remove("active"); })
+        .then(() => { alert("পাসওয়ার্ড সফলভাবে পরিবর্তিত!"); document.getElementById("settings-modal").classList.remove("active"); })
         .catch(err => alert(err.message));
 };
 
@@ -375,4 +375,3 @@ document.getElementById("btn-logout").onclick = () => {
         });
     }
 };
-
