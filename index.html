@@ -694,511 +694,474 @@
     </div>
 
     <script>
-        
         // ==========================================
-// ১. ফায়ারবেস ও ক্লাউডিনারি কনফিগারেশন 
+// CONFIGURATION INTEGRATED
 // ==========================================
 const firebaseConfig = {
     apiKey: "AIzaSyCFylUIK2wByPd70a4xEg2_8QkqY-MP8WM",
-  authDomain: "chatplus-22012026.firebaseapp.com",
-  projectId: "chatplus-22012026",
-  storageBucket: "chatplus-22012026.firebasestorage.app",
-  messagingSenderId: "530474889688",
-  appId: "1:530474889688:web:38e1545f1ee796a4bf42ad"
+    authDomain: "chatplus-22012026.firebaseapp.com",
+    projectId: "chatplus-22012026",
+    storageBucket: "chatplus-22012026.firebasestorage.app",
+    messagingSenderId: "530474889688",
+    appId: "1:530474889688:web:38e1545f1ee796a4bf42ad"
 };
 
-// Cloudinary Credentials
 const CLOUDINARY_URL = "https://api.cloudinary.com/v1_1/zx82me8y/upload";
-const CLOUDINARY_PRESET = "ChatPlus"; 
-        
-        
-        // Initialize Firebase
-        if(firebaseConfig.apiKey !== "AIzaSyCFylUIK2wByPd70a4xEg2_8QkqY-MP8WM") {
-            firebase.initializeApp(firebaseConfig);
-        }
+const CLOUDINARY_PRESET = "ChatPlus";
 
-        const auth = firebase.auth();
-        const db = firebase.firestore();
+// Initialize Firebase Core securely
+if (!firebase.apps.length) {
+    firebase.initializeApp(firebaseConfig);
+} else {
+    firebase.app(); 
+}
 
-        // System State Variables
-        let currentUserData = null;
-        let activeChatId = null;
-        let unsubscribeChats = null;
-        let unsubscribeMessages = null;
+const auth = firebase.auth();
+const db = firebase.firestore();
 
-        // Dom References
-        const splashScreen = document.getElementById('splash-screen');
-        const authScreen = document.getElementById('auth-screen');
-        const appContainer = document.getElementById('app-container');
-        const authForm = document.getElementById('auth-form');
-        const chatListContainer = document.getElementById('chat-list-container');
-        const noChatFallback = document.getElementById('no-chat-fallback');
-        const chatActiveStructure = document.getElementById('chat-active-structure');
-        const messageFlowBox = document.getElementById('message-flow-box');
-        const messageTypingField = document.getElementById('message-typing-field');
-        const messageSendTrigger = document.getElementById('message-send-trigger');
-        const mediaFileSelector = document.getElementById('media-file-selector');
-        
-        // Modals Remotes
-        const profileModal = document.getElementById('profile-modal');
-        const adminModal = document.getElementById('admin-modal');
+// System State Variables
+let currentUserData = null;
+let activeChatId = null;
+let unsubscribeChats = null;
+let unsubscribeMessages = null;
 
-        // ==========================================
-        // AUTHENTICATION ENGINE
-        // ==========================================
-        
-        // Auth State Listener
-        auth.onAuthStateChanged(user => {
-            if (user) {
-                // Fetch User Extra details from Firestore
-                db.collection("users").doc(user.uid).get().then(doc => {
-                    if (doc.exists) {
-                        currentUserData = doc.data();
-                        currentUserData.uid = user.uid;
-                        setupAppUI();
-                    } else {
-                        alert("ইউজার ডেটাবেস ফাইল পাওয়া যায়নি।");
-                        auth.signOut();
-                    }
-                }).catch(err => {
-                    alert("ডাটাবেস কানেকশন এরর: " + err.message);
-                });
+// Dom References
+const splashScreen = document.getElementById('splash-screen');
+const authScreen = document.getElementById('auth-screen');
+const appContainer = document.getElementById('app-container');
+const authForm = document.getElementById('auth-form');
+const chatListContainer = document.getElementById('chat-list-container');
+const noChatFallback = document.getElementById('no-chat-fallback');
+const chatActiveStructure = document.getElementById('chat-active-structure');
+const messageFlowBox = document.getElementById('message-flow-box');
+const messageTypingField = document.getElementById('message-typing-field');
+const messageSendTrigger = document.getElementById('message-send-trigger');
+const mediaFileSelector = document.getElementById('media-file-selector');
+
+// Modals Remotes
+const profileModal = document.getElementById('profile-modal');
+const adminModal = document.getElementById('admin-modal');
+
+// ==========================================
+// AUTHENTICATION ENGINE
+// ==========================================
+
+// Auth State Listener
+auth.onAuthStateChanged(user => {
+    if (user) {
+        // Fetch User Extra details from Firestore
+        db.collection("users").doc(user.uid).get().then(doc => {
+            if (doc.exists) {
+                currentUserData = doc.data();
+                currentUserData.uid = user.uid;
+                setupAppUI();
             } else {
-                showAuthScreen();
+                alert("আপনার ইউজার আইডি-টি Firestore-এর 'users' কালেকশনে খুঁজে পাওয়া যায়নি। অনুগ্রহ করে এডমিন প্যানেল থেকে ইউজার তৈরি করুন বা ডাটাবেস চেক করুন।");
+                auth.signOut();
             }
+        }).catch(err => {
+            alert("ডাটাবেস কানেকশন এরর: " + err.message);
+            showAuthScreen();
         });
+    } else {
+        showAuthScreen();
+    }
+});
 
-        // Login Handler
-        authForm.addEventListener('submit', e => {
-            e.preventDefault();
-            const username = document.getElementById('auth-username').value.trim().toLowerCase();
-            const password = document.getElementById('auth-password').value;
-            const computedEmail = `${username}@chatplus.com`;
+// Login Handler
+authForm.addEventListener('submit', e => {
+    e.preventDefault();
+    const username = document.getElementById('auth-username').value.trim().toLowerCase();
+    const password = document.getElementById('auth-password').value;
+    const computedEmail = `${username}@chatplus.com`;
 
-            auth.signInWithEmailAndPassword(computedEmail, password)
-                .catch(err => {
-                    alert("প্রবেশাধিকার প্রত্যাখ্যাত: ইউজারনেম বা পাসওয়ার্ড ভুল। " + err.message);
-                });
+    auth.signInWithEmailAndPassword(computedEmail, password)
+        .catch(err => {
+            alert("প্রবেশাধিকার প্রত্যাখ্যাত: ইউজারনেম বা পাসওয়ার্ড ভুল। " + err.message);
         });
+});
 
-        // Logout Handler
-        document.getElementById('logout-btn').addEventListener('click', () => {
-            if(unsubscribeChats) unsubscribeChats();
-            if(unsubscribeMessages) unsubscribeMessages();
-            auth.signOut();
-        });
+// Logout Handler
+document.getElementById('logout-btn').addEventListener('click', () => {
+    if(unsubscribeChats) unsubscribeChats();
+    if(unsubscribeMessages) unsubscribeMessages();
+    auth.signOut();
+});
 
-        function showAuthScreen() {
-            appContainer.style.display = 'none';
-            authScreen.style.display = 'flex';
-            splashScreen.style.opacity = 0;
-            setTimeout(() => splashScreen.style.visibility = 'hidden', 500);
-        }
+function showAuthScreen() {
+    appContainer.style.display = 'none';
+    authScreen.style.display = 'flex';
+    splashScreen.style.opacity = 0;
+    setTimeout(() => splashScreen.style.visibility = 'hidden', 500);
+}
 
-        function setupAppUI() {
-            authScreen.style.display = 'none';
-            appContainer.style.display = 'flex';
-            
-            // Set User profile DOM elements
-            document.getElementById('current-user-name').innerText = currentUserData.displayName;
-            if(currentUserData.avatarUrl) {
-                document.getElementById('current-user-avatar').src = currentUserData.avatarUrl;
-                document.getElementById('modal-profile-preview').src = currentUserData.avatarUrl;
-            }
+function setupAppUI() {
+    authScreen.style.display = 'none';
+    appContainer.style.display = 'flex';
+    
+    // Set User profile DOM elements
+    document.getElementById('current-user-name').innerText = currentUserData.displayName || currentUserData.username;
+    if(currentUserData.avatarUrl) {
+        document.getElementById('current-user-avatar').src = currentUserData.avatarUrl;
+        document.getElementById('modal-profile-preview').src = currentUserData.avatarUrl;
+    }
 
-            // Check Admin Rights
-            if (currentUserData.role === 'admin') {
-                document.getElementById('admin-panel-trigger').style.display = 'block';
-            } else {
-                document.getElementById('admin-panel-trigger').style.display = 'none';
-            }
+    // Check Admin Rights
+    if (currentUserData.role === 'admin') {
+        document.getElementById('admin-panel-trigger').style.display = 'block';
+    } else {
+        document.getElementById('admin-panel-trigger').style.display = 'none';
+    }
 
-            // Init Realtime Channels
-            loadChatChannels();
+    // Init Realtime Channels
+    loadChatChannels();
 
-            // Fade Splash Out
-            splashScreen.style.opacity = 0;
-            setTimeout(() => splashScreen.style.visibility = 'hidden', 500);
-        }
+    // Fade Splash Out
+    splashScreen.style.opacity = 0;
+    setTimeout(() => splashScreen.style.visibility = 'hidden', 500);
+}
 
-        // ==========================================
-        // FIRESTORE REAL-TIME CHAT ENGINE
-        // ==========================================
-        
-        function loadChatChannels() {
-            if(unsubscribeChats) unsubscribeChats();
+// ==========================================
+// FIRESTORE REAL-TIME CHAT ENGINE
+// ==========================================
 
-            // Query chats where user is member
-            unsubscribeChats = db.collection("chats")
-                .where("members", "array-contains", currentUserData.username)
-                .onSnapshot(snapshot => {
-                    chatListContainer.innerHTML = '';
-                    if(snapshot.empty) {
-                        chatListContainer.innerHTML = `<p style="text-align:center; color:var(--text-muted); margin-top:20px;">কোন একটিভ চ্যানেল নেই</p>`;
-                        return;
-                    }
+function loadChatChannels() {
+    if(unsubscribeChats) unsubscribeChats();
 
-                    snapshot.forEach(doc => {
-                        const data = doc.data();
-                        const id = doc.id;
-                        const isSelected = (id === activeChatId) ? 'active' : '';
-
-                        const chatItem = document.createElement('div');
-                        chatItem.className = `chat-item ${isSelected}`;
-                        chatItem.dataset.id = id;
-                        chatItem.innerHTML = `
-                            <div class="avatar-container">
-                                <img src="${data.avatarUrl || 'https://via.placeholder.com/150'}" class="avatar" alt="Room">
-                            </div>
-                            <div class="chat-item-details">
-                                <div class="chat-item-title-row">
-                                    <span class="chat-item-name">${data.name}</span>
-                                    <span class="chat-item-time">Active</span>
-                                </div>
-                                <div class="chat-item-lastmsg">${data.lastMessage || 'কোন বার্তা নেই'}</div>
-                            </div>
-                        `;
-
-                        chatItem.addEventListener('click', () => selectChatChannel(id, data));
-                        chatListContainer.appendChild(chatItem);
-                    });
-                }, err => {
-                    console.log("ইন্ডেক্সিং বা ফায়ারস্টোর রিড এরর সেফ গার্ড ক্যাচ: ", err.message);
-                });
-        }
-
-        function selectChatChannel(id, chatData) {
-            activeChatId = id;
-            
-            // UI state transitions for active items
-            document.querySelectorAll('.chat-item').forEach(item => {
-                item.classList.remove('active');
-                if(item.dataset.id === id) item.classList.add('active');
-            });
-
-            // Set Chat Header data
-            document.getElementById('active-chat-title').innerText = chatData.name;
-            document.getElementById('active-chat-avatar').src = chatData.avatarUrl || 'https://via.placeholder.com/150';
-            document.getElementById('active-chat-meta').innerText = `মেম্বার সংখ্যা: ${chatData.members.length}`;
-
-            noChatFallback.style.display = 'none';
-            chatActiveStructure.style.display = 'flex';
-
-            // Mobile view animation layer shift
-            document.body.classList.add('chat-open');
-
-            // Load realtime stream of messages
-            loadMessagesStream(id);
-        }
-
-        function loadMessagesStream(id) {
-            if(unsubscribeMessages) unsubscribeMessages();
-
-            unsubscribeMessages = db.collection("messages")
-                .where("chatId", "==", id)
-                .orderBy("timestamp", "asc")
-                .onSnapshot(snapshot => {
-                    messageFlowBox.innerHTML = '';
-                    
-                    snapshot.forEach(doc => {
-                        const msg = doc.data();
-                        const isOutgoing = (msg.senderUid === currentUserData.uid);
-                        const containerClass = isOutgoing ? 'outgoing' : 'incoming';
-                        
-                        let mediaHtml = '';
-                        if(msg.mediaUrl) {
-                            if(msg.mediaType && msg.mediaType.startsWith('video/')) {
-                                mediaHtml = `<video src="${msg.mediaUrl}" class="media-content" controls preload="metadata"></video>`;
-                            } else {
-                                mediaHtml = `<img src="${msg.mediaUrl}" class="media-content" alt="Media Asset" onclick="window.open('${msg.mediaUrl}', '_blank')">`;
-                            }
-                        }
-
-                        const bubbleNode = document.createElement('div');
-                        bubbleNode.className = `msg-container ${containerClass}`;
-                        bubbleNode.innerHTML = `
-                            <div class="msg-bubble">
-                                ${!isOutgoing ? `<span class="msg-sender">@${msg.senderName}</span>` : ''}
-                                ${msg.text ? `<span class="msg-text-data">${escapeHtml(msg.text)}</span>` : ''}
-                                ${mediaHtml}
-                                <span class="msg-meta">${formatTime(msg.timestamp)}</span>
-                            </div>
-                        `;
-                        messageFlowBox.appendChild(bubbleNode);
-                    });
-
-                    // Scroll to bottom view smooth animation
-                    messageFlowBox.scrollTop = messageFlowBox.scrollHeight;
-                }, err => {
-                    console.log("মেসেজ স্ট্রিমিং ক্যাচ ব্লক এরর সেফগার্ড: ", err.message);
-                });
-        }
-
-        // Send Message Handler
-        function fireMessageTransmit(text = null, mediaUrl = null, mediaType = null) {
-            if (!activeChatId) return;
-            if (!text && !mediaUrl) return;
-
-            const payload = {
-                chatId: activeChatId,
-                senderUid: currentUserData.uid,
-                senderName: currentUserData.username,
-                text: text,
-                mediaUrl: mediaUrl,
-                mediaType: mediaType,
-                timestamp: firebase.firestore.FieldValue.serverTimestamp()
-            };
-
-            db.collection("messages").add(payload).then(() => {
-                // Update conversation meta pointer
-                db.collection("chats").doc(activeChatId).update({
-                    lastMessage: text ? text : "[মিডিয়া ফাইল]"
-                });
-            }).catch(e => alert("বার্তা পাঠাতে ব্যর্থ: " + e.message));
-        }
-
-        messageSendTrigger.addEventListener('click', () => {
-            const rawText = messageTypingField.value.trim();
-            if(rawText) {
-                fireMessageTransmit(rawText);
-                messageTypingField.value = '';
-            }
-        });
-
-        messageTypingField.addEventListener('keypress', e => {
-            if (e.key === 'Enter') {
-                const rawText = messageTypingField.value.trim();
-                if(rawText) {
-                    fireMessageTransmit(rawText);
-                    messageTypingField.value = '';
-                }
-            }
-        });
-
-        // ==========================================
-        // CLOUDINARY MEDIA UPLOAD LOGIC
-        // ==========================================
-        
-        async function uploadToCloudinary(fileObject) {
-            if(CLOUDINARY_URL.includes("ChatPlus")) {
-                alert("Cloudinary ক্রেডেনশিয়াল সেট করা নেই!");
-                return null;
-            }
-
-            const formData = new FormData();
-            formData.append("file", fileObject);
-            formData.append("upload_preset", CLOUDINARY_PRESET);
-
-            try {
-                const response = await fetch(CLOUDINARY_URL, {
-                    method: "POST",
-                    body: formData
-                });
-                if (!response.ok) throw new Error("নেটওয়ার্ক প্রোটোকল রিজেকশন");
-                const data = await response.json();
-                return { url: data.secure_url, type: fileObject.type };
-            } catch (err) {
-                alert("ক্লাউডিনারি মিডিয়া সার্ভার আপলোড এরর: " + err.message);
-                return null;
-            }
-        }
-
-        // Input Asset Listener
-        mediaFileSelector.addEventListener('change', async e => {
-            const file = e.target.files[0];
-            if (!file) return;
-
-            messageTypingField.placeholder = "আপলোড হচ্ছে... নেটওয়ার্ক হোল্ড করুন...";
-            messageTypingField.disabled = true;
-
-            const uploadResult = await uploadToCloudinary(file);
-            
-            messageTypingField.placeholder = "টাইপ করুন সুরক্ষিত বার্তা...";
-            messageTypingField.disabled = false;
-            mediaFileSelector.value = ''; // Flush storage stack
-
-            if (uploadResult) {
-                fireMessageTransmit(null, uploadResult.url, uploadResult.type);
-            }
-        });
-
-        // ==========================================
-        // PROFILE MODIFICATION LOGIC
-        // ==========================================
-        
-        // Trigger Modal Open
-        document.getElementById('profile-menu-trigger').addEventListener('click', () => {
-            profileModal.style.display = 'flex';
-        });
-        document.getElementById('profile-modal-close').addEventListener('click', () => {
-            profileModal.style.display = 'none';
-        });
-
-        let targetAvatarFile = null;
-        document.getElementById('avatar-file-selector').addEventListener('change', e => {
-            const file = e.target.files[0];
-            if(file) {
-                targetAvatarFile = file;
-                document.getElementById('modal-profile-preview').src = URL.createObjectURL(file);
-            }
-        });
-
-        document.getElementById('save-profile-trigger').addEventListener('click', async () => {
-            const newPassword = document.getElementById('update-password-field').value.trim();
-            let finalAvatarUrl = currentUserData.avatarUrl || "";
-
-            document.getElementById('save-profile-trigger').innerText = "আপলোডিং...";
-            
-            if(targetAvatarFile) {
-                const uploaded = await uploadToCloudinary(targetAvatarFile);
-                if(uploaded) finalAvatarUrl = uploaded.url;
-            }
-
-            const batchPromises = [];
-            
-            // Database update
-            const docRef = db.collection("users").doc(currentUserData.uid);
-            batchPromises.push(docRef.update({ avatarUrl: finalAvatarUrl }));
-
-            // Live instance auth variable sync
-            if(newPassword) {
-                const user = auth.currentUser;
-                batchPromises.push(user.updatePassword(newPassword));
-            }
-
-            Promise.all(batchPromises).then(() => {
-                alert("প্রোফাইল কনফিগারেশন সাকসেসফুলি আপডেটেড।");
-                currentUserData.avatarUrl = finalAvatarUrl;
-                document.getElementById('current-user-avatar').src = finalAvatarUrl;
-                document.getElementById('update-password-field').value = '';
-                profileModal.style.display = 'none';
-                document.getElementById('save-profile-trigger').innerText = "SAVE CONFIG";
-            }).catch(err => {
-                alert("কনফিগারেশন আপডেট ফেইল্ড: " + err.message);
-                document.getElementById('save-profile-trigger').innerText = "SAVE CONFIG";
-            });
-        });
-
-        // ==========================================
-        // ADMIN MANAGEMENT PANEL
-        // ==========================================
-        
-        document.getElementById('admin-panel-trigger').addEventListener('click', () => {
-            adminModal.style.display = 'flex';
-        });
-        document.getElementById('admin-modal-close').addEventListener('click', () => {
-            adminModal.style.display = 'none';
-        });
-
-        // Create User (Secondary Firebase Context Loophole avoiding main auth hijacking)
-        document.getElementById('admin-create-user-btn').addEventListener('click', () => {
-            const username = document.getElementById('admin-new-username').value.trim().toLowerCase();
-            const displayName = document.getElementById('admin-new-displayname').value.trim();
-            const password = document.getElementById('admin-new-password').value;
-            const role = document.getElementById('admin-new-role').value;
-
-            if(!username || !displayName || !password) {
-                alert("সমস্ত ইনপুট ফিল্ড ফিল আপ করুন!");
+    // Query chats where user is member
+    unsubscribeChats = db.collection("chats")
+        .where("members", "array-contains", currentUserData.username)
+        .onSnapshot(snapshot => {
+            chatListContainer.innerHTML = '';
+            if(snapshot.empty) {
+                chatListContainer.innerHTML = `<p style="text-align:center; color:var(--text-muted); margin-top:20px;">কোন একটিভ চ্যানেল নেই</p>`;
                 return;
             }
 
-            const computedEmail = `${username}@chatplus.com`;
-            
-            // Secondary standalone instance creation pattern
-            let secondaryApp = firebase.initializeApp(firebaseConfig, "SecondaryAppInstance");
+            snapshot.forEach(doc => {
+                const data = doc.data();
+                const id = doc.id;
+                const isSelected = (id === activeChatId) ? 'active' : '';
 
-            secondaryApp.auth().createUserWithEmailAndPassword(computedEmail, password)
-                .then(credential => {
-                    // Inject into Firestore Users document database mapping tree
-                    return db.collection("users").doc(credential.user.uid).set({
-                        username: username,
-                        displayName: displayName,
-                        role: role,
-                        avatarUrl: "",
-                        createdAt: firebase.firestore.FieldValue.serverTimestamp()
-                    });
-                })
-                .then(() => {
-                    alert(`ইউজার [${username}] সফলভাবে সিস্টেমে তৈরি করা হয়েছে।`);
-                    document.getElementById('admin-new-username').value = '';
-                    document.getElementById('admin-new-displayname').value = '';
-                    document.getElementById('admin-new-password').value = '';
-                    secondaryApp.delete();
-                })
-                .catch(err => {
-                    alert("ইউজার ক্রিয়েশন এরর সাবসিস্টেম: " + err.message);
-                });
-        });
-
-        // Create Channel Group
-        document.getElementById('admin-create-channel-btn').addEventListener('click', () => {
-            const channelName = document.getElementById('admin-channel-name').value.trim();
-            const membersRaw = document.getElementById('admin-channel-members').value.trim();
-
-            if(!channelName || !membersRaw) {
-                alert("চ্যানেলের নাম এবং মেম্বার লিস্ট দিন!");
-                return;
-            }
-
-            // Convert comma strings into array mapping format
-            const parsedMembers = membersRaw.split(',').map(m => m.trim().toLowerCase());
-            
-            // Auto add creator to system list integrity safety
-            if(!parsedMembers.includes(currentUserData.username)) {
-                parsedMembers.push(currentUserData.username);
-            }
-
-            db.collection("chats").add({
-                name: channelName,
-                avatarUrl: "",
-                members: parsedMembers,
-                lastMessage: "চ্যানেল তৈরি করা হয়েছে",
-                createdAt: firebase.firestore.FieldValue.serverTimestamp()
-            }).then(() => {
-                alert(`নতুন নেটওয়ার্ক চ্যানেল [${channelName}] ওপেন করা হয়েছে।`);
-                document.getElementById('admin-channel-name').value = '';
-                document.getElementById('admin-channel-members').value = '';
-            }).catch(e => alert("চ্যানেল ক্রিয়েশন ফেইল্ড: " + e.message));
-        });
-
-        // ==========================================
-        // MOBILE MOBILE RESPONSIVE UI CONTROLS
-        // ==========================================
-        document.getElementById('mobile-back-trigger').addEventListener('click', () => {
-            document.body.classList.remove('chat-open');
-        });
-
-        // UTILITY UTILS
-        function formatTime(firestoreTimestamp) {
-            if(!firestoreTimestamp) return "Just now";
-            const date = firestoreTimestamp.toDate();
-            let hours = date.getHours();
-            let minutes = date.getMinutes();
-            const ampm = hours >= 12 ? 'PM' : 'AM';
-            hours = hours % 12;
-            hours = hours ? hours : 12; 
-            minutes = minutes < 10 ? '0'+minutes : minutes;
-            return hours + ':' + minutes + ' ' + ampm;
-        }
-
-        function escapeHtml(str) {
-            return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
-        }
-
-        // Dynamic Initialization Validation check
-        window.addEventListener('DOMContentLoaded', () => {
-            setTimeout(() => {
-                if(firebaseConfig.apiKey === "AIzaSyCFylUIK2wByPd70a4xEg2_8QkqY-MP8WM") {
-                    splashScreen.style.display = 'none';
-                    document.body.innerHTML = `
-                        <div style="padding:40px; text-align:center; color:#ff019a; font-family:'Orbitron',sans-serif; background:#0b0816; height:100vh; display:flex; flex-direction:column; justify-content:center; align-items:center;">
-                            <h2>CRITICAL CONFIG CONFIG DEVIATION</h2>
-                            <p style="color:#fff; margin-top:15px; font-family: 'Rajdhani', sans-serif;">কোডের শুরুতে Firebase Config এবং Cloudinary প্লেসহোল্ডার ডেটা রিপ্লেস করুন।</p>
+                const chatItem = document.createElement('div');
+                chatItem.className = `chat-item ${isSelected}`;
+                chatItem.dataset.id = id;
+                chatItem.innerHTML = `
+                    <div class="avatar-container">
+                        <img src="${data.avatarUrl || 'https://via.placeholder.com/150'}" class="avatar" alt="Room">
+                    </div>
+                    <div class="chat-item-details">
+                        <div class="chat-item-title-row">
+                            <span class="chat-item-name">${data.name}</span>
+                            <span class="chat-item-time">Active</span>
                         </div>
-                    `;
-                }
-            }, 1000);
+                        <div class="chat-item-lastmsg">${data.lastMessage || 'কোন বার্তা নেই'}</div>
+                    </div>
+                `;
+
+                chatItem.addEventListener('click', () => selectChatChannel(id, data));
+                chatListContainer.appendChild(chatItem);
+            });
+        }, err => {
+            console.log("ফায়ারস্টোর স্ন্যাপশট রিড এরর: ", err.message);
         });
+}
+
+function selectChatChannel(id, chatData) {
+    activeChatId = id;
+    
+    document.querySelectorAll('.chat-item').forEach(item => {
+        item.classList.remove('active');
+        if(item.dataset.id === id) item.classList.add('active');
+    });
+
+    document.getElementById('active-chat-title').innerText = chatData.name;
+    document.getElementById('active-chat-avatar').src = chatData.avatarUrl || 'https://via.placeholder.com/150';
+    document.getElementById('active-chat-meta').innerText = `মেম্বার সংখ্যা: ${chatData.members.length}`;
+
+    noChatFallback.style.display = 'none';
+    chatActiveStructure.style.display = 'flex';
+
+    document.body.classList.add('chat-open');
+
+    loadMessagesStream(id);
+}
+
+function loadMessagesStream(id) {
+    if(unsubscribeMessages) unsubscribeMessages();
+
+    unsubscribeMessages = db.collection("messages")
+        .where("chatId", "==", id)
+        .orderBy("timestamp", "asc")
+        .onSnapshot(snapshot => {
+            messageFlowBox.innerHTML = '';
+            
+            snapshot.forEach(doc => {
+                const msg = doc.data();
+                const isOutgoing = (msg.senderUid === currentUserData.uid);
+                const containerClass = isOutgoing ? 'outgoing' : 'incoming';
+                
+                let mediaHtml = '';
+                if(msg.mediaUrl) {
+                    if(msg.mediaType && msg.mediaType.startsWith('video/')) {
+                        mediaHtml = `<video src="${msg.mediaUrl}" class="media-content" controls preload="metadata"></video>`;
+                    } else {
+                        mediaHtml = `<img src="${msg.mediaUrl}" class="media-content" alt="Media Asset" onclick="window.open('${msg.mediaUrl}', '_blank')">`;
+                    }
+                }
+
+                const bubbleNode = document.createElement('div');
+                bubbleNode.className = `msg-container ${containerClass}`;
+                bubbleNode.innerHTML = `
+                    <div class="msg-bubble">
+                        ${!isOutgoing ? `<span class="msg-sender">@${msg.senderName}</span>` : ''}
+                        ${msg.text ? `<span class="msg-text-data">${escapeHtml(msg.text)}</span>` : ''}
+                        ${mediaHtml}
+                        <span class="msg-meta">${formatTime(msg.timestamp)}</span>
+                    </div>
+                `;
+                messageFlowBox.appendChild(bubbleNode);
+            });
+
+            messageFlowBox.scrollTop = messageFlowBox.scrollHeight;
+        }, err => {
+            console.log("মেসেজ স্ট্রিমিং এরর: ", err.message);
+        });
+}
+
+function fireMessageTransmit(text = null, mediaUrl = null, mediaType = null) {
+    if (!activeChatId) return;
+    if (!text && !mediaUrl) return;
+
+    const payload = {
+        chatId: activeChatId,
+        senderUid: currentUserData.uid,
+        senderName: currentUserData.username,
+        text: text,
+        mediaUrl: mediaUrl,
+        mediaType: mediaType,
+        timestamp: firebase.firestore.FieldValue.serverTimestamp()
+    };
+
+    db.collection("messages").add(payload).then(() => {
+        db.collection("chats").doc(activeChatId).update({
+            lastMessage: text ? text : "[মিডিয়া ফাইল]"
+        });
+    }).catch(e => alert("বার্তা পাঠাতে ব্যর্থ: " + e.message));
+}
+
+messageSendTrigger.addEventListener('click', () => {
+    const rawText = messageTypingField.value.trim();
+    if(rawText) {
+        fireMessageTransmit(rawText);
+        messageTypingField.value = '';
+    }
+});
+
+messageTypingField.addEventListener('keypress', e => {
+    if (e.key === 'Enter') {
+        const rawText = messageTypingField.value.trim();
+        if(rawText) {
+            fireMessageTransmit(rawText);
+            messageTypingField.value = '';
+        }
+    }
+});
+
+// ==========================================
+// CLOUDINARY MEDIA UPLOAD LOGIC
+// ==========================================
+
+async function uploadToCloudinary(fileObject) {
+    const formData = new FormData();
+    formData.append("file", fileObject);
+    formData.append("upload_preset", CLOUDINARY_PRESET);
+
+    try {
+        const response = await fetch(CLOUDINARY_URL, {
+            method: "POST",
+            body: formData
+        });
+        if (!response.ok) throw new Error("নেটওয়ার্ক প্রোটোকল রিজেকশন");
+        const data = await response.json();
+        return { url: data.secure_url, type: fileObject.type };
+    } catch (err) {
+        alert("ক্লাউডিনারি মিডিয়া সার্ভার আপলোড এরর: " + err.message);
+        return null;
+    }
+}
+
+mediaFileSelector.addEventListener('change', async e => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    messageTypingField.placeholder = "আপলোড হচ্ছে... নেটওয়ার্ক হোল্ড করুন...";
+    messageTypingField.disabled = true;
+
+    const uploadResult = await uploadToCloudinary(file);
+    
+    messageTypingField.placeholder = "টাইপ করুন সুরক্ষিত বার্তা...";
+    messageTypingField.disabled = false;
+    mediaFileSelector.value = ''; 
+
+    if (uploadResult) {
+        fireMessageTransmit(null, uploadResult.url, uploadResult.type);
+    }
+});
+
+// ==========================================
+// PROFILE MODIFICATION LOGIC
+// ==========================================
+
+document.getElementById('profile-menu-trigger').addEventListener('click', () => {
+    profileModal.style.display = 'flex';
+});
+document.getElementById('profile-modal-close').addEventListener('click', () => {
+    profileModal.style.display = 'none';
+});
+
+let targetAvatarFile = null;
+document.getElementById('avatar-file-selector').addEventListener('change', e => {
+    const file = e.target.files[0];
+    if(file) {
+        targetAvatarFile = file;
+        document.getElementById('modal-profile-preview').src = URL.createObjectURL(file);
+    }
+});
+
+document.getElementById('save-profile-trigger').addEventListener('click', async () => {
+    const newPassword = document.getElementById('update-password-field').value.trim();
+    let finalAvatarUrl = currentUserData.avatarUrl || "";
+
+    document.getElementById('save-profile-trigger').innerText = "আপলোডিং...";
+    
+    if(targetAvatarFile) {
+        const uploaded = await uploadToCloudinary(targetAvatarFile);
+        if(uploaded) finalAvatarUrl = uploaded.url;
+    }
+
+    const batchPromises = [];
+    const docRef = db.collection("users").doc(currentUserData.uid);
+    batchPromises.push(docRef.update({ avatarUrl: finalAvatarUrl }));
+
+    if(newPassword) {
+        const user = auth.currentUser;
+        batchPromises.push(user.updatePassword(newPassword));
+    }
+
+    Promise.all(batchPromises).then(() => {
+        alert("প্রোফাইল কনফিগারেশন সাকসেসফুলি আপডেটেড।");
+        currentUserData.avatarUrl = finalAvatarUrl;
+        document.getElementById('current-user-avatar').src = finalAvatarUrl;
+        document.getElementById('update-password-field').value = '';
+        profileModal.style.display = 'none';
+        document.getElementById('save-profile-trigger').innerText = "SAVE CONFIG";
+    }).catch(err => {
+        alert("কনফিগারেশন আপডেট ফেইল্ড: " + err.message);
+        document.getElementById('save-profile-trigger').innerText = "SAVE CONFIG";
+    });
+});
+
+// ==========================================
+// ADMIN MANAGEMENT PANEL
+// ==========================================
+
+document.getElementById('admin-panel-trigger').addEventListener('click', () => {
+    adminModal.style.display = 'flex';
+});
+document.getElementById('admin-modal-close').addEventListener('click', () => {
+    adminModal.style.display = 'none';
+});
+
+document.getElementById('admin-create-user-btn').addEventListener('click', () => {
+    const username = document.getElementById('admin-new-username').value.trim().toLowerCase();
+    const displayName = document.getElementById('admin-new-displayname').value.trim();
+    const password = document.getElementById('admin-new-password').value;
+    const role = document.getElementById('admin-new-role').value;
+
+    if(!username || !displayName || !password) {
+        alert("সমস্ত ইনপুট ফিল্ড ফিল আপ করুন!");
+        return;
+    }
+
+    const computedEmail = `${username}@chatplus.com`;
+    let secondaryApp = firebase.initializeApp(firebaseConfig, "SecondaryAppInstance");
+
+    secondaryApp.auth().createUserWithEmailAndPassword(computedEmail, password)
+        .then(credential => {
+            return db.collection("users").doc(credential.user.uid).set({
+                username: username,
+                displayName: displayName,
+                role: role,
+                avatarUrl: "",
+                createdAt: firebase.firestore.FieldValue.serverTimestamp()
+            });
+        })
+        .then(() => {
+            alert(`ইউজার [${username}] সফলভাবে সিস্টেমে তৈরি করা হয়েছে।`);
+            document.getElementById('admin-new-username').value = '';
+            document.getElementById('admin-new-displayname').value = '';
+            document.getElementById('admin-new-password').value = '';
+            secondaryApp.delete();
+        })
+        .catch(err => {
+            alert("ইউজার ক্রিয়েশন এরর: " + err.message);
+        });
+});
+
+document.getElementById('admin-create-channel-btn').addEventListener('click', () => {
+    const channelName = document.getElementById('admin-channel-name').value.trim();
+    const membersRaw = document.getElementById('admin-channel-members').value.trim();
+
+    if(!channelName || !membersRaw) {
+        alert("চ্যানেলের নাম এবং মেম্বার লিস্ট দিন!");
+        return;
+    }
+
+    const parsedMembers = membersRaw.split(',').map(m => m.trim().toLowerCase());
+    
+    if(!parsedMembers.includes(currentUserData.username)) {
+        parsedMembers.push(currentUserData.username);
+    }
+
+    db.collection("chats").add({
+        name: channelName,
+        avatarUrl: "",
+        members: parsedMembers,
+        lastMessage: "চ্যানেল তৈরি করা হয়েছে",
+        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+    }).then(() => {
+        alert(`নতুন নেটওয়ার্ক চ্যানেল [${channelName}] ওপেন করা হয়েছে।`);
+        document.getElementById('admin-channel-name').value = '';
+        document.getElementById('admin-channel-members').value = '';
+    }).catch(e => alert("চ্যানেল ক্রিয়েশন ফেইল্ড: " + e.message));
+});
+
+// ==========================================
+// MOBILE RESPONSIVE UI CONTROLS
+// ==========================================
+document.getElementById('mobile-back-trigger').addEventListener('click', () => {
+    document.body.classList.remove('chat-open');
+});
+
+// UTILITY UTILS
+function formatTime(firestoreTimestamp) {
+    if(!firestoreTimestamp) return "Just now";
+    const date = firestoreTimestamp.toDate();
+    let hours = date.getHours();
+    let minutes = date.getMinutes();
+    const ampm = hours >= 12 ? 'PM' : 'AM';
+    hours = hours % 12;
+    hours = hours ? hours : 12; 
+    minutes = minutes < 10 ? '0'+minutes : minutes;
+    return hours + ':' + minutes + ' ' + ampm;
+}
+
+function escapeHtml(str) {
+    return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
+        }
+                
+                                            
     </script>
 </body>
 </html>
