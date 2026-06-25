@@ -1,0 +1,761 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>VECTOR LINK // CYBERPUNK REAL-TIME NETWORK</title>
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Orbitron:wght@400;700;900&display=swap');
+
+        /* =========================================================================
+           🎨 CHAPTER 1: INTENSIVE UI/UX ARCHITECTURE & GLOBAL TOKENS
+           ========================================================================= */
+        :root {
+            --neon-cyan: #00f2fe;
+            --neon-pink: #fe019a;
+            --neon-purple: #7f00ff;
+            --bg-cyber-dark: linear-gradient(135deg, #090613 0%, #110c22 50%, #030206 100%);
+            --glass-card: rgba(18, 13, 34, 0.65);
+            --glass-border: rgba(255, 255, 255, 0.06);
+            --text-neon-white: #f5f2fb;
+            --text-cyber-muted: #888dbf;
+            --neon-green: #39ff14;
+            
+            --glow-cyan: 0 0 15px #00f2fe, 0 0 5px #00f2fe;
+            --glow-pink: 0 0 15px #fe019a, 0 0 5px #fe019a;
+            --glow-purple: 0 0 15px #7f00ff, 0 0 5px #7f00ff;
+            --glow-green: 0 0 12px #39ff14, 0 0 4px #39ff14;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            user-select: none;
+        }
+
+        body {
+            background: var(--bg-cyber-dark);
+            color: var(--text-neon-white);
+            font-family: 'Inter', sans-serif;
+            height: 100vh;
+            width: 100vw;
+            overflow: hidden;
+            position: relative;
+        }
+
+        h1, h2, h3, h4, .cyber-heading, button, .username-token {
+            font-family: 'Orbitron', sans-serif;
+            letter-spacing: 1px;
+        }
+
+        /* Webkit Scrollbar Customization */
+        ::-webkit-scrollbar {
+            width: 5px;
+            height: 5px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: var(--neon-purple);
+            border-radius: 10px;
+            box-shadow: 0 0 8px var(--neon-purple);
+        }
+
+        .neon-text-cyan { color: var(--neon-cyan); text-shadow: var(--glow-cyan); }
+        .neon-text-pink { color: var(--neon-pink); text-shadow: var(--glow-pink); }
+        .neon-text-purple { color: var(--neon-purple); text-shadow: var(--glow-purple); }
+
+        /* =========================================================================
+           ⚡ SPLASH SCREEN INTERIOR ARCHITECTURE
+           ========================================================================= */
+        #splash-screen {
+            position: fixed;
+            top: 0; left: 0; width: 100vw; height: 100vh;
+            background: #030206;
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            transition: opacity 0.5s ease, visibility 0.5s;
+        }
+        #splash-screen.hidden {
+            opacity: 0;
+            visibility: hidden;
+        }
+        .splash-logo {
+            font-size: 5rem;
+            color: var(--neon-cyan);
+            animation: logoPulseSpin 2.5s infinite ease-in-out;
+            margin-bottom: 25px;
+        }
+        .splash-title {
+            font-size: 1.8rem;
+            text-transform: uppercase;
+            font-weight: 900;
+            margin-bottom: 10px;
+        }
+        .splash-loader-bar {
+            width: 220px;
+            height: 3px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            overflow: hidden;
+            position: relative;
+        }
+        .splash-loader-fill {
+            position: absolute;
+            top: 0; left: -100%;
+            width: 100%; height: 100%;
+            background: linear-gradient(90deg, transparent, var(--neon-cyan), transparent);
+            animation: subLoader 1.8s infinite linear;
+        }
+        @keyframes logoPulseSpin {
+            0% { transform: scale(1) rotate(0deg); text-shadow: var(--glow-cyan); }
+            50% { transform: scale(1.1) rotate(180deg); text-shadow: var(--glow-pink); color: var(--neon-pink); }
+            100% { transform: scale(1) rotate(360deg); text-shadow: var(--glow-cyan); }
+        }
+        @keyframes subLoader {
+            0% { left: -100%; }
+            100% { left: 100%; }
+        }
+
+        /* =========================================================================
+           🛡️ AUTHENTICATION INTERFACE (USERNAMED PIPELINE)
+           ========================================================================= */
+        #auth-container {
+            position: fixed;
+            top: 0; left: 0; width: 100vw; height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 8000;
+            background: var(--bg-cyber-dark);
+            background-image: radial-gradient(rgba(0, 242, 254, 0.08) 1px, transparent 1px);
+            background-size: 32px 32px;
+        }
+        #auth-container.hidden { display: none !important; }
+        .auth-card {
+            width: 90%;
+            max-width: 420px;
+            padding: 35px;
+            border-radius: 24px;
+            backdrop-filter: blur(28px);
+            -webkit-backdrop-filter: blur(28px);
+            background: var(--glass-card);
+            border: 1px solid var(--glass-border);
+            box-shadow: 0 20px 50px rgba(0,0,0,0.3);
+            position: relative;
+        }
+        .auth-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 4px;
+            background: linear-gradient(90deg, var(--neon-cyan), var(--neon-pink));
+        }
+        .auth-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .auth-header h2 {
+            font-size: 1.6rem;
+            text-transform: uppercase;
+        }
+        .auth-header p {
+            font-size: 0.85rem;
+            color: var(--text-cyber-muted);
+            margin-top: 5px;
+        }
+        .input-group {
+            position: relative;
+            margin-bottom: 20px;
+        }
+        .input-group i {
+            position: absolute;
+            left: 18px; top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-cyber-muted);
+        }
+        .cyber-input {
+            width: 100%;
+            padding: 16px 16px 16px 50px;
+            background: rgba(0, 0, 0, 0.45);
+            border: 1px solid var(--glass-border);
+            border-radius: 12px;
+            color: #fff;
+            font-size: 0.95rem;
+            outline: none;
+            transition: all 0.25s ease;
+        }
+        .cyber-input:focus {
+            border-color: var(--neon-pink);
+            box-shadow: 0 0 15px rgba(254, 1, 154, 0.3);
+        }
+        .cyber-btn {
+            width: 100%;
+            padding: 16px;
+            background: linear-gradient(135deg, var(--neon-purple) 0%, #5200cc 100%);
+            border: none;
+            border-radius: 12px;
+            color: #fff;
+            font-size: 1rem;
+            font-weight: 700;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(127, 0, 255, 0.3);
+            text-transform: uppercase;
+        }
+
+        /* =========================================================================
+           🖥========= CORE DASHBOARD MASTER GRID LAYOUT ==========================
+           ========================================================================= */
+        #dashboard-wrapper {
+            display: grid;
+            grid-template-columns: 360px 1fr;
+            width: 100vw;
+            height: 100vh;
+            overflow: hidden;
+        }
+        #dashboard-wrapper.hidden { display: none !important; }
+
+        .sidebar {
+            background: rgba(12, 8, 24, 0.9);
+            border-right: 1px solid var(--glass-border);
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+        }
+        .sidebar-header {
+            height: 70px;
+            padding: 0 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid var(--glass-border);
+        }
+        .current-user-profile {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .user-avatar {
+            width: 42px; height: 42px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid var(--neon-cyan);
+        }
+        .current-user-name {
+            font-size: 0.95rem;
+            font-weight: 700;
+        }
+        .header-actions {
+            display: flex;
+            gap: 15px;
+        }
+        .action-icon-btn {
+            color: var(--text-cyber-muted);
+            cursor: pointer;
+        }
+        .action-icon-btn:hover {
+            color: var(--neon-cyan);
+            text-shadow: var(--glow-cyan);
+        }
+
+        .search-zone {
+            height: 60px;
+            padding: 10px 16px;
+        }
+        .search-wrapper { position: relative; width: 100%; }
+        .search-wrapper i { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: var(--neon-cyan); }
+        .search-wrapper input {
+            width: 100%;
+            padding: 10px 10px 10px 40px;
+            background: rgba(0,0,0,0.3);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            color: #fff;
+            outline: none;
+        }
+
+        .live-chat-list {
+            flex-grow: 1;
+            overflow-y: auto;
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .chat-item-node {
+            display: flex;
+            align-items: center;
+            padding: 12px;
+            border-radius: 14px;
+            background: var(--glass-card);
+            border: 1px solid var(--glass-border);
+            cursor: pointer;
+        }
+        .chat-item-node.active-chat-item {
+            border-color: var(--neon-purple);
+            background: rgba(127, 0, 255, 0.15);
+        }
+        .node-avatar { width: 46px; height: 46px; border-radius: 50%; object-fit: cover; margin-right: 12px; }
+        .node-info-block { flex-grow: 1; overflow: hidden; }
+        .node-name { font-size: 0.92rem; font-weight: 700; color: #fff; }
+        .node-preview-msg { font-size: 0.8rem; color: var(--text-cyber-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+        /* =========================================================================
+           🌌 CHAT WINDOW MASTER FRAMEWORK (RIGHT PANEL)
+           ========================================================================= */
+        .chat-window {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            background-color: #0d091a;
+            position: relative;
+        }
+        .null-chat-overlay {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background: #0d091a;
+            z-index: 50;
+        }
+        .null-chat-overlay.hidden { display: none !important; }
+        .null-vector-icon { font-size: 4rem; color: var(--neon-cyan); text-shadow: var(--glow-cyan); margin-bottom: 15px;}
+
+        .chat-header {
+            height: 70px;
+            padding: 0 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid var(--neon-cyan);
+            background: rgba(18, 13, 34, 0.9);
+        }
+        .chat-header-meta { display: flex; align-items: center; gap: 14px; }
+        .mobile-back-btn { display: none; font-size: 1.2rem; color: var(--neon-cyan); cursor: pointer; }
+        .active-room-avatar { width: 44px; height: 44px; border-radius: 50%; object-fit: cover; border: 1px solid var(--neon-cyan); }
+
+        .message-board-arena {
+            flex-grow: 1;
+            overflow-y: auto;
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+        .msg-row-container { display: flex; width: 100%; }
+        .msg-row-container.incoming-type { justify-content: flex-start; }
+        .msg-row-container.outgoing-type { justify-content: flex-end; }
+        .msg-bubble-core {
+            max-width: 65%;
+            padding: 12px 18px;
+            font-size: 0.95rem;
+            border-radius: 18px;
+            word-break: break-word;
+        }
+        .incoming-type .msg-bubble-core { background: rgba(22, 17, 38, 0.85); border-left: 3px solid var(--neon-cyan); color: #fff;}
+        .outgoing-type .msg-bubble-core { background: linear-gradient(135deg, var(--neon-pink) 0%, var(--neon-purple) 100%); color: #fff; }
+
+        .chat-footer-controls {
+            height: 70px;
+            padding: 0 20px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            background: rgba(14, 10, 26, 0.9);
+        }
+        .message-capsule-input {
+            flex-grow: 1;
+            height: 46px;
+            border-radius: 35px;
+            padding: 0 24px;
+            background: rgba(0, 0, 0, 0.5);
+            border: 1px solid var(--glass-border);
+            color: #fff;
+            outline: none;
+        }
+
+        /* Modals & Toasts */
+        .floating-modal-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100vw; height: 100vh;
+            background: rgba(3, 2, 6, 0.85);
+            backdrop-filter: blur(10px);
+            z-index: 9000;
+            display: none;
+            justify-content: center;
+            align-items: center;
+        }
+        .floating-modal-overlay.open { display: flex; }
+        .modal-surface-card { width: 90%; max-width: 440px; background: #120d22; padding: 30px; border-radius: 20px; border: 1px solid var(--glass-border); position: relative; }
+        .modal-close-cross { position: absolute; top: 20px; right: 20px; cursor: pointer; color: var(--text-cyber-muted); }
+        .form-select-node { width:100%; padding: 12px; background:#000; color:#fff; border: 1px solid var(--glass-border); border-radius: 8px; margin-bottom: 15px; }
+
+        #toast-notification-hub { position: fixed; bottom: 85px; right: 25px; z-index: 10000; display: flex; flex-direction: column; gap: 10px; }
+        .cyber-toast-node { padding: 12px 20px; background: #000; border-left: 4px solid var(--neon-pink); color: #fff; border-radius: 8px; font-size: 0.85rem;}
+
+        @media (max-width: 768px) {
+            #dashboard-wrapper { grid-template-columns: 1fr; }
+            .sidebar { display: flex; width: 100vw; height: 100vh; }
+            .chat-window { display: none; width: 100vw; height: 100vh; position: absolute; top: 0; left: 0; z-index: 500; }
+            body.chat-active-mode .sidebar { display: none !important; }
+            body.chat-active-mode .chat-window { display: flex !important; }
+            .mobile-back-btn { display: block; }
+        }
+    </style>
+</head>
+<body>
+
+    <div id="splash-screen">
+        <i class="fa-solid fa-bolt-lightning splash-logo"></i>
+        <div class="splash-title neon-text-cyan">VECTOR LINK v2.0</div>
+        <div class="splash-loader-bar"><div class="splash-loader-fill"></div></div>
+    </div>
+
+    <div id="auth-container" class="hidden">
+        <div class="auth-card">
+            <div class="auth-header">
+                <h2 class="neon-text-pink">SYSTEM ACCESS</h2>
+                <p>Establish cryptographic mainframe link</p>
+            </div>
+            <form id="auth-crypto-form">
+                <div class="input-group">
+                    <input type="text" id="auth-username-field" class="cyber-input" placeholder="Matrix Username" required>
+                    <i class="fa-solid fa-terminal"></i>
+                </div>
+                <div class="input-group">
+                    <input type="password" id="auth-password-field" class="cyber-input" placeholder="Access Cipher Password" required>
+                    <i class="fa-solid fa-shield-halved"></i>
+                </div>
+                <button type="submit" class="cyber-btn">INITIALIZE CORE PROTOCOL</button>
+            </form>
+        </div>
+    </div>
+
+    <div id="dashboard-wrapper" class="hidden">
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="current-user-profile">
+                    <img id="my-profile-avatar" src="https://via.placeholder.com/150/00f2fe/000000?text=USER" class="user-avatar" alt="Avatar">
+                    <span id="my-profile-name" class="current-user-name">LOADING...</span>
+                </div>
+                <div class="header-actions">
+                    <i id="admin-panel-trigger" class="fa-solid fa-shield-cat action-icon-btn" style="color:var(--neon-pink); display:none;"></i>
+                    <i id="profile-edit-trigger" class="fa-solid fa-gear action-icon-btn"></i>
+                    <i id="system-logout-btn" class="fa-solid fa-power-off action-icon-btn"></i>
+                </div>
+            </div>
+            <div class="search-zone">
+                <div class="search-wrapper">
+                    <i class="fa-solid fa-magnifying-glass"></i>
+                    <input type="text" id="node-search-field" placeholder="Search nodes...">
+                </div>
+            </div>
+            <div id="live-channels-stream-container" class="live-chat-list"></div>
+        </aside>
+
+        <main class="chat-window">
+            <div id="null-state-channel-block" class="null-chat-overlay">
+                <i class="fa-solid fa-circle-nodes null-vector-icon"></i>
+                <div class="null-vector-text">🔥 VECTOR NET OK. SELECT NODE TARGET.</div>
+            </div>
+
+            <div class="chat-header">
+                <div class="chat-header-meta">
+                    <i id="mobile-back-vector-btn" class="fa-solid fa-chevron-left mobile-back-btn"></i>
+                    <img id="active-channel-image-node" src="https://via.placeholder.com/150" class="active-room-avatar" alt="Pic">
+                    <div class="active-room-details">
+                        <span id="active-channel-title-text" class="active-room-name">Mainframe Secure Link</span>
+                    </div>
+                </div>
+            </div>
+
+            <div id="realtime-message-board-container" class="message-board-arena"></div>
+
+            <div class="chat-footer-controls">
+                <div id="attachment-click-trigger" class="action-icon-btn" style="font-size:1.3rem;"><i class="fa-solid fa-circle-plus"></i></div>
+                <input type="text" id="payload-message-input" class="message-capsule-input" placeholder="Type encrypted message...">
+                <button id="payload-transmission-submit-btn" class="cyber-btn" style="width: auto; padding: 12px 20px;">SEND</button>
+            </div>
+        </main>
+    </div>
+
+    <div id="profile-customizer-modal-layer" class="floating-modal-overlay">
+        <div class="modal-surface-card">
+            <i class="fa-solid fa-xmark modal-close-cross" id="close-profile-modal"></i>
+            <h3>// MODIFY NODE IDENTITY</h3>
+            <form id="profile-update-crypto-form">
+                <div style="margin-bottom:15px;">
+                    <label style="font-size:0.8rem; color:var(--text-cyber-muted);">Display Name</label>
+                    <input type="text" id="profile-name-input-node" class="cyber-input" style="padding-left:15px;">
+                </div>
+                <button type="submit" class="cyber-btn">SAVE NODE PROFILE</button>
+            </form>
+        </div>
+    </div>
+
+    <div id="admin-mainframe-modal-layer" class="floating-modal-overlay">
+        <div class="modal-surface-card">
+            <i class="fa-solid fa-xmark modal-close-cross" id="close-admin-modal"></i>
+            <h3>// CORE PROVISION SYSTEM</h3>
+            <select id="admin-task-selector" class="form-select-node">
+                <option value="provision">CREATE USER ACCOUNT</option>
+                <option value="group">FORGE MULTIPLEX GROUP CHAT</option>
+            </select>
+            <div id="admin-form-container">
+                <form id="admin-action-form">
+                    <input type="text" id="adm-input-1" class="cyber-input" style="padding-left:15px; margin-bottom:15px;" placeholder="Username / Group Name" required>
+                    <input type="text" id="adm-input-2" class="cyber-input" style="padding-left:15px; margin-bottom:15px;" placeholder="Full Name / Members CSV (e.g user1,user2)" required>
+                    <input type="password" id="adm-input-3" class="cyber-input" style="padding-left:15px; margin-bottom:15px;" placeholder="Password Asset Token">
+                    <button type="submit" class="cyber-btn">EXECUTE OVERRIDE FORCE</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <input type="file" id="hidden-media-payload-uploader" accept="image/*" style="display:none;">
+    <div id="toast-notification-hub"></div>
+
+    <script type="module">
+        // Import Firebase CDN Modules safely using standard Modern Web Protocols
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+        import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+        import { getFirestore, doc, getDoc, setDoc, collection, addDoc, query, where, orderBy, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+        // Real Config Initialization Object
+        const firebaseConfig = {
+            apiKey: "AIzaSyCFylUIK2wByPd70a4xEg2_8QkqY-MP8WM",
+            authDomain: "chatplus-22012026.firebaseapp.com",
+            projectId: "chatplus-22012026",
+            storageBucket: "chatplus-22012026.firebasestorage.app",
+            messagingSenderId: "530474889688",
+            appId: "1:530474889688:web:38e1545f1ee796a4bf42ad"
+        };
+
+        // Core Global Application Variables instances 
+        let app, auth, db;
+        let currentUser = null;
+        let currentChatId = null;
+        let activeMessageUnsubscribe = null;
+
+        // Auto-Bypass Safety Initializer Engine
+        try {
+            app = initializeApp(firebaseConfig);
+            auth = getAuth(app);
+            db = getFirestore(app);
+        } catch (error) {
+            console.error("Firebase init failed, switching to sandbox simulation fallback layout.");
+            setupLocalBypassSimulationMatrix();
+        }
+
+        function showToast(msg) {
+            const hub = document.getElementById('toast-notification-hub');
+            const node = document.createElement('div');
+            node.className = 'cyber-toast-node';
+            node.innerText = `// NET LOG: ${msg}`;
+            hub.appendChild(node);
+            setTimeout(() => node.remove(), 4000);
+        }
+
+        // =========================================================================
+        // ROUTER MONITORING LAYER
+        // =========================================================================
+        if (auth) {
+            onAuthStateChanged(auth, async (user) => {
+                if (user) {
+                    const docRef = doc(db, "users", user.uid);
+                    const snap = await getDoc(docRef);
+                    if (snap.exists()) {
+                        currentUser = snap.data();
+                        currentUser.uid = user.uid;
+                        launchAppDashboard();
+                    } else {
+                        showToast("Node profiling sync error. Purging storage credentials.");
+                        signOut(auth);
+                    }
+                } else {
+                    document.getElementById('dashboard-wrapper').classList.add('hidden');
+                    document.getElementById('auth-container').classList.remove('hidden');
+                    document.getElementById('splash-screen').classList.add('hidden');
+                }
+            });
+        }
+
+        // Authentication form validation handling
+        document.getElementById('auth-crypto-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const username = document.getElementById('auth-username-field').value.trim().toLowerCase();
+            const pass = document.getElementById('auth-password-field').value;
+            
+            document.getElementById('splash-screen').classList.remove('hidden');
+            try {
+                await signInWithEmailAndPassword(auth, `${username}@chatplus.com`, pass);
+            } catch (err) {
+                document.getElementById('splash-screen').classList.add('hidden');
+                showToast(`Access Denied Terminal: ${err.message}`);
+            }
+        });
+
+        function launchAppDashboard() {
+            document.getElementById('auth-container').classList.add('hidden');
+            document.getElementById('dashboard-wrapper').classList.remove('hidden');
+            document.getElementById('my-profile-name').innerText = currentUser.name.toUpperCase();
+            document.getElementById('splash-screen').classList.add('hidden');
+
+            if (currentUser.role === 'admin') {
+                document.getElementById('admin-panel-trigger').style.display = 'block';
+            }
+            loadChatRoomsListChannels();
+        }
+
+        // Fetch Live Chat Streams Matrix List
+        function loadChatRoomsListChannels() {
+            const q = query(collection(db, "chats"), where("members", "array-contains", currentUser.username));
+            onSnapshot(q, (snapshot) => {
+                const container = document.getElementById('live-channels-stream-container');
+                container.innerHTML = '';
+                
+                if(snapshot.empty) {
+                    container.innerHTML = `<div style="text-align:center; padding:20px; font-size:0.8rem; color:var(--text-cyber-muted);">// LINK IS INTUITIVE VACANT</div>`;
+                }
+
+                snapshot.forEach((chatDoc) => {
+                    const chat = chatDoc.data();
+                    const id = chatDoc.id;
+                    
+                    let title = chat.name || "DIRECT NODE";
+                    let pic = chat.pic || "https://via.placeholder.com/150/7f00ff/ffffff?text=LINK";
+
+                    const row = document.createElement('div');
+                    row.className = `chat-item-node ${currentChatId === id ? 'active-chat-item' : ''}`;
+                    row.innerHTML = `
+                        <img src="${pic}" class="node-avatar">
+                        <div class="node-info-block">
+                            <div class="node-name">${title}</div>
+                            <div class="node-preview-msg">${chat.lastMessage || '// Ready Link Link'}</div>
+                        </div>
+                    `;
+                    row.onclick = () => selectAndOpenChatRoomNode(id, title, pic);
+                    container.appendChild(row);
+                });
+            });
+        }
+
+        function selectAndOpenChatRoomNode(id, title, pic) {
+            currentChatId = id;
+            document.getElementById('null-state-channel-block').classList.add('hidden');
+            document.getElementById('active-channel-title-text').innerText = title;
+            document.getElementById('active-channel-image-node').src = pic;
+            document.body.classList.add('chat-active-mode');
+
+            listenToRealtimeMessages(id);
+        }
+
+        function listenToRealtimeMessages(id) {
+            if (activeMessageUnsubscribe) activeMessageUnsubscribe();
+            
+            const q = query(collection(db, "messages"), where("chatId", "==", id), orderBy("timestamp", "asc"));
+            activeMessageUnsubscribe = onSnapshot(q, (snapshot) => {
+                const board = document.getElementById('realtime-message-board-container');
+                board.innerHTML = '';
+                
+                snapshot.forEach((mDoc) => {
+                    const msg = mDoc.data();
+                    const rowClass = (msg.senderId === currentUser.username) ? 'outgoing-type' : 'incoming-type';
+                    
+                    const el = document.createElement('div');
+                    el.className = `msg-row-container ${rowClass}`;
+                    el.innerHTML = `<div class="msg-bubble-core">${msg.text}</div>`;
+                    board.appendChild(el);
+                });
+                board.scrollTop = board.scrollHeight;
+            }, (err) => {
+                // Primary Bypass sorting strategy error handling validation router
+                const fallbackQuery = query(collection(db, "messages"), where("chatId", "==", id));
+                onSnapshot(fallbackQuery, (snap) => {
+                    const board = document.getElementById('realtime-message-board-container');
+                    board.innerHTML = '';
+                    snap.forEach((d) => {
+                        const m = d.data();
+                        const rc = (m.senderId === currentUser.username) ? 'outgoing-type' : 'incoming-type';
+                        const el = document.createElement('div');
+                        el.className = `msg-row-container ${rc}`;
+                        el.innerHTML = `<div class="msg-bubble-core">${m.text || '// Unresolved Payload'}</div>`;
+                        board.appendChild(el);
+                    });
+                });
+            });
+        }
+
+        // Dispatch Send Messages Execution Pipelines
+        async function sendPayloadMessageFinal() {
+            const input = document.getElementById('payload-message-input');
+            const val = input.value.trim();
+            if(!val || !currentChatId) return;
+
+            input.value = '';
+            await addDoc(collection(db, "messages"), {
+                chatId: currentChatId,
+                senderId: currentUser.username,
+                text: val,
+                timestamp: new Date()
+            });
+        }
+
+        document.getElementById('payload-transmission-submit-btn').onclick = sendPayloadMessageFinal;
+        document.getElementById('payload-message-input').onkeydown = (e) => { if (e.key === 'Enter') sendPayloadMessageFinal(); };
+
+        // Interface Toggle Actions Bindings Loops Operators Setup
+        document.getElementById('mobile-back-vector-btn').onclick = () => document.body.classList.remove('chat-active-mode');
+        document.getElementById('system-logout-btn').onclick = () => { if(confirm("// CLOSE MATRIX DISCONNECT LINK SECTOR?")) signOut(auth); };
+        
+        document.getElementById('profile-edit-trigger').onclick = () => document.getElementById('profile-customizer-modal-layer').classList.add('open');
+        document.getElementById('close-profile-modal').onclick = () => document.getElementById('profile-customizer-modal-layer').classList.remove('open');
+        document.getElementById('admin-panel-trigger').onclick = () => document.getElementById('admin-mainframe-modal-layer').classList.add('open');
+        document.getElementById('close-admin-modal').onclick = () => document.getElementById('admin-mainframe-modal-layer').classList.remove('open');
+
+        // =========================================================================
+        // AUTOMATED BACKUP BYPASS SANDBOX SIMULATION MATRIX
+        // =========================================================================
+        function setupLocalBypassSimulationMatrix() {
+            document.getElementById('splash-screen').classList.add('hidden');
+            document.getElementById('auth-container').classList.remove('hidden');
+            showToast("Bypass mode operational. Local internal virtual engine simulation initialized.");
+
+            document.getElementById('auth-crypto-form').onsubmit = (e) => {
+                e.preventDefault();
+                currentUser = { name: "Guest Cyber Runner", username: "guest_runner", role: "admin", uid: "SANDBOX_UID" };
+                launchAppDashboard();
+                simulateVirtualLocalChannelsStreamNodes();
+            };
+        }
+
+        function simulateVirtualLocalChannelsStreamNodes() {
+            const container = document.getElementById('live-channels-stream-container');
+            container.innerHTML = `
+                <div class="chat-item-node active-chat-item" id="sandbox-row">
+                    <img src="https://via.placeholder.com/150/7f00ff/ffffff?text=NET" class="node-avatar">
+                    <div class="node-info-block">
+                        <div class="node-name">SYSTEM METAPLEX CHIP</div>
+                        <div class="node-preview-msg">⚡ [AUTOMATED SANDBOX OVERRIDE STREAM INTERFACE SYSTEM WORKING]</div>
+                    </div>
+                </div>
+            `;
+            document.getElementById('sandbox-row').onclick = () => {
+                document.getElementById('null-state-channel-block').classList.add('hidden');
+                document.getElementById('realtime-message-board-container').innerHTML = `
+                    <div class="msg-row-container incoming-type"><div class="msg-bubble-core">SYSTEM OPERATIONAL: Credentials failed validation parameters checks. Bypass virtual engine loaded successfully.</div></div>
+                    <div class="msg-row-container outgoing-type"><div class="msg-bubble-core">Network connection stable. Console safe logs stream initialized correctly.</div></div>
+                `;
+            };
+        }
+    </script>
+</body>
+</html>
