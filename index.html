@@ -3,26 +3,142 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ChatPlus - Premium</title>
-    <link rel="stylesheet" href="style.css">
+    <title>ChatPlus Ultra Premium</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* ==========================================
+           🎨 ULTRA MODERN NEON DARK THEME (CSS)
+           ========================================== */
+        :root {
+            --bg-gradient: linear-gradient(135deg, #0f0c20 0%, #15102a 50%, #06040a 100%);
+            --card-glass: rgba(25, 20, 45, 0.55);
+            --border-glass: rgba(255, 255, 255, 0.08);
+            --neon-cyan: #00f2fe;
+            --neon-pink: #fe019a;
+            --neon-purple: #7f00ff;
+            --text-main: #f1edfa;
+            --text-muted: #9fa4dd;
+            --msg-out: linear-gradient(135deg, #7f00ff 0%, #ff007f 100%);
+            --msg-in: rgba(255, 255, 255, 0.08);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif; }
+        body { background: var(--bg-gradient); color: var(--text-main); height: 100vh; overflow: hidden; }
+        .screen { display: none; height: 100vh; width: 100vw; position: relative; }
+        .screen.active { display: flex; }
+        .hidden { display: none !important; }
+
+        /* ✨ Splash Screen */
+        #splash-screen { background: #06040a; justify-content: center; align-items: center; flex-direction: column; gap: 20px; }
+        .splash-logo { font-size: 70px; background: linear-gradient(45deg, var(--neon-cyan), var(--neon-pink)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; filter: drop-shadow(0 0 20px var(--neon-cyan)); animation: pulse 2s infinite ease-in-out; }
+        .loader { border: 3px solid rgba(255,255,255,0.05); border-top: 3px solid var(--neon-pink); border-radius: 50%; width: 40px; height: 40px; animation: spin 0.8s linear infinite; filter: drop-shadow(0 0 8px var(--neon-pink)); }
+
+        /* 🔐 Neon Login Card */
+        #login-screen { justify-content: center; align-items: center; flex-direction: column; padding: 20px; }
+        .login-card { background: var(--card-glass); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border: 1px solid var(--border-glass); padding: 40px 30px; border-radius: 24px; width: 100%; max-width: 380px; text-align: center; box-shadow: 0 15px 35px rgba(0,0,0,0.5), inset 0 0 20px rgba(255,255,255,0.02); }
+        .login-card h2 { font-size: 28px; font-weight: 700; background: linear-gradient(45deg, var(--neon-cyan), #ffffff); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 5px; }
+        .login-card p { color: var(--text-muted); font-size: 14px; margin-bottom: 30px; }
+        .input-group { display: flex; align-items: center; background: rgba(0, 0, 0, 0.3); border: 1px solid var(--border-glass); margin: 15px 0; padding: 14px 18px; border-radius: 14px; transition: 0.3s; }
+        .input-group:focus-within { border-color: var(--neon-cyan); box-shadow: 0 0 15px rgba(0, 242, 254, 0.2); }
+        .input-group i { color: var(--text-muted); font-size: 18px; }
+        .input-group input { border: none; background: transparent; outline: none; width: 100%; color: #fff; font-size: 16px; margin-left: 12px; }
+        .btn-login { width: 100%; padding: 15px; background: linear-gradient(45deg, var(--neon-cyan), var(--neon-purple)); border: none; color: #fff; font-weight: 600; font-size: 16px; border-radius: 14px; cursor: pointer; transition: 0.3s; box-shadow: 0 4px 15px rgba(0, 242, 254, 0.3); margin-top: 15px; }
+        .btn-login:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0, 242, 254, 0.5); }
+        
+        /* 👑 Fixed Developer Credit */
+        .developer-credit { position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%); font-size: 11px; letter-spacing: 3px; font-weight: 800; text-transform: uppercase; background: linear-gradient(45deg, var(--neon-cyan), var(--neon-pink)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; text-shadow: 0 0 10px rgba(254, 1, 154, 0.3); text-align: center; width: 100%; }
+
+        /* 📱 App Container Layout */
+        .app-container { display: flex; width: 100%; height: 100vh; position: relative; }
+        .sidebar { width: 360px; background: rgba(15, 12, 32, 0.6); border-right: 1px solid var(--border-glass); display: flex; flex-direction: column; z-index: 5; transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1); }
+        .sidebar-header { height: 70px; display: flex; align-items: center; justify-content: space-between; padding: 0 20px; border-bottom: 1px solid var(--border-glass); background: rgba(0,0,0,0.15); }
+        .user-profile { display: flex; align-items: center; gap: 12px; font-weight: 600; cursor: pointer; }
+        .user-profile img { width: 42px; height: 42px; border-radius: 50%; object-fit: cover; border: 2px solid var(--neon-cyan); box-shadow: 0 0 10px rgba(0, 242, 254, 0.3); }
+        .header-actions button { background: none; border: none; font-size: 20px; cursor: pointer; margin-left: 15px; color: var(--text-muted); transition: 0.3s; }
+        .header-actions button:hover { color: var(--neon-pink); filter: drop-shadow(0 0 5px var(--neon-pink)); }
+        .search-box { padding: 12px 15px; }
+        .search-inner { display: flex; align-items: center; background: rgba(0,0,0,0.25); border: 1px solid var(--border-glass); padding: 10px 15px; border-radius: 12px; }
+        .search-inner input { border: none; background: transparent; outline: none; width: 100%; color: #fff; margin-left: 10px; }
+
+        /* 🌌 Ultra Colorful Chat List */
+        .chat-list { flex: 1; overflow-y: auto; padding: 5px 10px; }
+        .chat-item { display: flex; align-items: center; padding: 14px 15px; border-radius: 16px; cursor: pointer; gap: 14px; margin-bottom: 8px; transition: 0.3s; border: 1px solid transparent; }
+        .chat-item:hover { background: rgba(255, 255, 255, 0.03); border-color: var(--border-glass); }
+        .chat-item.active-item { background: rgba(127, 0, 255, 0.15); border-color: rgba(127, 0, 255, 0.3); box-shadow: 0 5px 15px rgba(127, 0, 255, 0.1); }
+        .chat-item img { width: 50px; height: 50px; border-radius: 50%; object-fit: cover; border: 2px solid var(--border-glass); }
+        .chat-info { flex: 1; min-width: 0; }
+        .chat-name-time { display: flex; justify-content: space-between; font-weight: 600; font-size: 15px; margin-bottom: 4px; }
+        .chat-last-msg { font-size: 13px; color: var(--text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+        /* 💬 Modern Chat Area */
+        .chat-window { flex: 1; display: flex; flex-direction: column; background: rgba(6, 4, 10, 0.3); position: relative; z-index: 2; transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1); }
+        .chat-header { height: 70px; background: rgba(0,0,0,0.2); display: flex; align-items: center; padding: 0 20px; border-bottom: 1px solid var(--border-glass); backdrop-filter: blur(10px); }
+        .back-btn { background: none; border: none; color: var(--neon-cyan); font-size: 20px; margin-right: 15px; cursor: pointer; display: none; }
+        .active-chat-user { display: flex; align-items: center; gap: 14px; }
+        .active-chat-user img { width: 44px; height: 44px; border-radius: 50%; object-fit: cover; border: 2px solid var(--neon-pink); box-shadow: 0 0 10px rgba(254, 1, 154, 0.2); }
+        .active-chat-user h4 { font-size: 16px; font-weight: 600; }
+
+        .message-area { flex: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; }
+        .message { display: flex; width: 100%; }
+        .message.incoming { justify-content: flex-start; }
+        .message.outgoing { justify-content: flex-end; }
+        .msg-bubble { max-width: 75%; padding: 12px 16px; border-radius: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.2); position: relative; backdrop-filter: blur(5px); }
+        .incoming .msg-bubble { background: var(--msg-in); border: 1px solid var(--border-glass); border-top-left-radius: 4px; color: #fff; }
+        .outgoing .msg-bubble { background: var(--msg-out); border-top-right-radius: 4px; color: #fff; }
+        .msg-bubble p { font-size: 15px; line-height: 1.5; word-break: break-word; }
+        .msg-time { font-size: 10px; color: rgba(255,255,255,0.5); text-align: right; display: block; margin-top: 5px; }
+
+        .chat-footer { height: 70px; background: rgba(0,0,0,0.25); display: flex; align-items: center; padding: 0 15px; gap: 12px; border-top: 1px solid var(--border-glass); }
+        .attach-btn { font-size: 22px; color: var(--neon-cyan); cursor: pointer; transition: 0.3s; }
+        .attach-btn:hover { filter: drop-shadow(0 0 8px var(--neon-cyan)); }
+        .input-wrapper { flex: 1; }
+        .input-wrapper input { width: 100%; padding: 14px 20px; border-radius: 14px; border: 1px solid var(--border-glass); outline: none; background: rgba(0,0,0,0.3); color: #fff; font-size: 15px; transition: 0.3s; }
+        .input-wrapper input:focus { border-color: var(--neon-purple); }
+        #btn-send { background: none; border: none; font-size: 24px; color: var(--neon-pink); cursor: pointer; filter: drop-shadow(0 0 5px var(--neon-pink)); transition: 0.3s; }
+
+        /* 🎛️ Premium Neon Modals */
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(5, 3, 10, 0.85); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); justify-content: center; align-items: center; z-index: 999; padding: 20px; }
+        .modal.active { display: flex; }
+        .modal-content { background: #120e25; border: 1px solid rgba(255, 255, 255, 0.1); padding: 30px 25px; border-radius: 24px; width: 100%; max-width: 400px; box-shadow: 0 20px 50px rgba(0,0,0,0.6); max-height: 85vh; overflow-y: auto; }
+        .modal-content h3 { font-size: 20px; font-weight: 700; margin-bottom: 15px; background: linear-gradient(45deg, var(--neon-pink), #fff); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .admin-box h4 { font-size: 14px; text-transform: uppercase; color: var(--neon-cyan); margin: 15px 0 5px 0; letter-spacing: 1px; }
+        .admin-box input { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid var(--border-glass); border-radius: 12px; background: rgba(0,0,0,0.3); color: #fff; outline: none; }
+        .file-upload-label { display: block; background: linear-gradient(45deg, rgba(0, 242, 254, 0.1), rgba(127, 0, 255, 0.1)); text-align: center; padding: 12px; border-radius: 12px; margin-top: 8px; border: 1px dashed var(--neon-cyan); cursor: pointer; font-size: 14px; }
+        .file-upload-label input { display: none; }
+        .upload-status { font-size: 11px; color: var(--text-muted); text-align: center; margin-top: 4px; }
+        .modal-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px; }
+        .btn-save { background: linear-gradient(45deg, var(--neon-cyan), var(--neon-purple)); color: #fff; border: none; padding: 12px 24px; font-weight: 600; border-radius: 12px; cursor: pointer; }
+        .btn-cancel { background: rgba(255,255,255,0.05); color: var(--text-main); border: none; padding: 12px 24px; border-radius: 12px; cursor: pointer; }
+
+        /* 📱 Mobile Specific Layout Optimization */
+        @media (max-width: 768px) {
+            .sidebar { width: 100%; position: absolute; left: 0; top: 0; height: 100%; }
+            .chat-window { width: 100%; position: absolute; left: 100%; top: 0; height: 100%; background: #0c0919; }
+            .app-container.chat-open .chat-window { left: 0; }
+            .back-btn { display: block; }
+        }
+
+        /* Animations */
+        @keyframes spin { 100% { transform: rotate(360deg); } }
+        @keyframes pulse { 50% { transform: scale(1.05); filter: drop-shadow(0 0 30px var(--neon-pink)); } }
+    </style>
 </head>
 <body>
 
-    <!-- ১. স্প্ল্যাশ স্ক্রিন -->
+    <!-- 🌟 Splash Screen -->
     <div id="splash-screen" class="screen active">
-        <div class="splash-content">
-            <i class="fab fa-whatsapp splash-logo"></i>
-            <h2>ChatPlus</h2>
-            <div class="loader"></div>
+        <div style="text-align:center;">
+            <i class="fab fa-lightning-bolt splash-logo fa-bolt"></i>
+            <h2 style="font-size:32px; font-weight:800; letter-spacing:2px;">CHATPLUS</h2>
+            <div class="loader" style="margin:20px auto 0 auto;"></div>
         </div>
     </div>
 
-    <!-- ২. লগইন পেজ -->
+    <!-- 🔐 Login Screen -->
     <div id="login-screen" class="screen">
         <div class="login-card">
-            <h2>Welcome to ChatPlus</h2>
-            <p>Please login to your account</p>
+            <h2>Welcome Back</h2>
+            <p>Login to experience the future</p>
             <form id="login-form">
                 <div class="input-group">
                     <i class="fas fa-user"></i>
@@ -32,48 +148,48 @@
                     <i class="fas fa-lock"></i>
                     <input type="password" id="password" placeholder="Password" required>
                 </div>
-                <button type="submit" class="btn-login">Login</button>
+                <button type="submit" class="btn-login">Connect Now</button>
             </form>
         </div>
         <div class="developer-credit">Developed by UTSAB SARKER</div>
     </div>
 
-    <!-- ৩. মূল ড্যাশবোর্ড -->
+    <!-- 🌌 Main Dashboard -->
     <div id="main-dashboard" class="screen">
         <div class="app-container">
             <aside class="sidebar">
                 <header class="sidebar-header">
                     <div class="user-profile" id="btn-my-profile">
-                        <img src="https://via.placeholder.com/40" id="my-avatar" alt="Profile">
+                        <img src="https://via.placeholder.com/42" id="my-avatar">
                         <span id="my-username">Loading...</span>
                     </div>
                     <div class="header-actions">
-                        <button id="btn-admin-panel" class="hidden"><i class="fas fa-user-shield"></i></button>
-                        <button id="btn-logout"><i class="fas fa-sign-out-alt"></i></button>
+                        <button id="btn-admin-panel" class="hidden"><i class="fas fa-shield-alt"></i></button>
+                        <button id="btn-logout"><i class="fas fa-power-off"></i></button>
                     </div>
                 </header>
                 <div class="search-box">
-                    <i class="fas fa-search"></i>
-                    <input type="text" id="search-chats" placeholder="Search chats...">
+                    <div class="search-inner">
+                        <i class="fas fa-search" style="color:var(--text-muted);"></i>
+                        <input type="text" id="search-chats" placeholder="Search chats...">
+                    </div>
                 </div>
                 <div class="chat-list" id="chat-list-container"></div>
             </aside>
 
             <main class="chat-window">
                 <header class="chat-header">
-                    <button id="btn-back-to-list" class="back-btn"><i class="fas fa-arrow-left"></i></button>
+                    <button id="btn-back-to-list" class="back-btn"><i class="fas fa-chevron-left"></i></button>
                     <div class="active-chat-user" id="active-chat-info">
-                        <h4>Select a chat to start messaging</h4>
+                        <h4>Select a room to chat</h4>
                     </div>
                 </header>
                 <div class="message-area" id="message-container"></div>
                 <footer class="chat-footer">
-                    <div class="attachment-buttons">
-                        <label for="media-input" class="attach-btn"><i class="fas fa-camera"></i></label>
-                        <input type="file" id="media-input" accept="image/*,video/*" style="display:none;">
-                    </div>
+                    <label for="media-input" class="attach-btn"><i class="fas fa-plus-circle"></i></label>
+                    <input type="file" id="media-input" accept="image/*,video/*" style="display:none;">
                     <div class="input-wrapper">
-                        <input type="text" id="msg-input" placeholder="Type a message...">
+                        <input type="text" id="msg-input" placeholder="Type neon message...">
                     </div>
                     <button id="btn-send"><i class="fas fa-paper-plane"></i></button>
                 </footer>
@@ -81,58 +197,299 @@
         </div>
     </div>
 
-    <!-- ৪. প্রোফাইল এডিট মডাল -->
+    <!-- 🎛️ Profile Edit Modal -->
     <div id="profile-modal" class="modal">
         <div class="modal-content admin-box">
-            <h3>Edit My Profile</h3>
-            <hr>
+            <h3>Modify My Profile</h3>
             <label class="file-upload-label">
-                <i class="fas fa-user-circle"></i> Upload New Profile Pic
+                <i class="fas fa-camera-retro"></i> Change Profile Picture
                 <input type="file" id="edit-my-pic" accept="image/*">
             </label>
-            <div id="my-pic-status" class="upload-status">No file chosen</div>
-            <input type="password" id="change-my-pass" placeholder="New Password (Optional)">
+            <div id="my-pic-status" class="upload-status">No image file chosen</div>
+            <input type="password" id="change-my-pass" placeholder="Update Password (Optional)">
             <div class="modal-actions">
                 <button class="btn-cancel" id="close-profile">Cancel</button>
-                <button class="btn-save" id="btn-save-profile">Save Changes</button>
+                <button class="btn-save" id="btn-save-profile">Apply Changes</button>
             </div>
         </div>
     </div>
 
-    <!-- ৫. এডমিন প্যানেল মডাল -->
+    <!-- 👑 Admin Panel Modal -->
     <div id="admin-modal" class="modal">
         <div class="modal-content admin-box">
-            <h3>Admin Panel</h3>
-            <hr>
-            <h4>Create User</h4>
+            <h3>Nebula Control Panel</h3>
+            <hr style="border-color:var(--border-glass); margin:10px 0;">
+            <h4>Create Portal User</h4>
             <input type="text" id="new-user-name" placeholder="Full Name">
-            <input type="text" id="new-user-username" placeholder="Username">
+            <input type="text" id="new-user-username" placeholder="Unique Username">
             <input type="password" id="new-user-pass" placeholder="Password">
             <label class="file-upload-label">
-                <i class="fas fa-image"></i> Choose Profile Pic
+                <i class="fas fa-cloud-upload-alt"></i> Set Profile Photo
                 <input type="file" id="new-user-pic" accept="image/*">
             </label>
-            <div id="user-pic-status" class="upload-status">No file chosen</div>
-            <button class="btn-save" id="btn-create-user">Create User</button>
-            <hr>
-            <h4>Create Group</h4>
-            <input type="text" id="group-name" placeholder="Group Name">
+            <div id="user-pic-status" class="upload-status">No photo chosen</div>
+            <button class="btn-save" id="btn-create-user" style="width:100%; margin-top:10px;">Deploy User</button>
+            
+            <hr style="border-color:var(--border-glass); margin:20px 0;">
+            <h4>Create Nexus Group</h4>
+            <input type="text" id="group-name" placeholder="Group Identity Name">
             <label class="file-upload-label">
-                <i class="fas fa-users"></i> Group Pic
+                <i class="fas fa-users"></i> Set Group Avatar Photo
                 <input type="file" id="group-pic" accept="image/*">
             </label>
-            <div id="group-pic-status" class="upload-status">No file chosen</div>
+            <div id="group-pic-status" class="upload-status">No photo chosen</div>
             <input type="text" id="group-members" placeholder="Members (comma separated: rony,sajib)">
-            <button class="btn-save" id="btn-create-group">Create Group</button>
-            <hr>
-            <button class="btn-cancel" id="close-admin">Close</button>
+            <button class="btn-save" id="btn-create-group" style="width:100%; margin-top:10px;">Forge Group</button>
+            <hr style="border-color:var(--border-glass); margin:20px 0;">
+            <button class="btn-cancel" id="close-admin" style="width:100%;">Close Terminal</button>
         </div>
     </div>
 
+    <!-- 🌐 SDK Loading -->
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
-    <script src="app.js"></script>
+
+    <script>
+        // ==========================================
+// ১. ফায়ারবেস ও ক্লাউডিনারি কনফিগারেশন 
+// ==========================================
+const firebaseConfig = {
+    apiKey: "AIzaSyCFylUIK2wByPd70a4xEg2_8QkqY-MP8WM",
+  authDomain: "chatplus-22012026.firebaseapp.com",
+  projectId: "chatplus-22012026",
+  storageBucket: "chatplus-22012026.firebasestorage.app",
+  messagingSenderId: "530474889688",
+  appId: "1:530474889688:web:38e1545f1ee796a4bf42ad"
+};
+
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const db = firebase.firestore();
+
+// Cloudinary Credentials
+const CLOUDINARY_URL = "https://api.cloudinary.com/v1_1/zx82me8y/upload";
+const CLOUDINARY_PRESET = "ChatPlus"; 
+ 
+
+        let currentUser = null;
+        let currentChatId = null;
+        let activeUnsubscribe = null;
+
+        // ⚡ Cloudinary Upload Core Engine
+        async function uploadFile(file) {
+            if (!file) return null;
+            const formData = new FormData();
+            formData.append("file", file);
+            formData.append("upload_preset", CLOUDINARY_PRESET);
+            try {
+                const res = await fetch(CLOUDINARY_URL, { method: "POST", body: formData });
+                const data = await res.json();
+                return data.secure_url || null;
+            } catch (err) {
+                console.error("Upload Error:", err);
+                return null;
+            }
+        }
+
+        // File names rendering for phones
+        document.getElementById("edit-my-pic").onchange = (e) => document.getElementById("my-pic-status").innerText = e.target.files[0].name;
+        document.getElementById("new-user-pic").onchange = (e) => document.getElementById("user-pic-status").innerText = e.target.files[0].name;
+        document.getElementById("group-pic").onchange = (e) => document.getElementById("group-pic-status").innerText = e.target.files[0].name;
+
+        // 🔐 Dynamic Authentication Stream
+        auth.onAuthStateChanged(user => {
+            document.getElementById("splash-screen").classList.remove("active");
+            if (user) {
+                db.collection("users").doc(user.uid).get().then(doc => {
+                    if (doc.exists) {
+                        currentUser = doc.data();
+                        currentUser.uid = user.uid;
+                        document.getElementById("my-username").innerText = currentUser.name;
+                        document.getElementById("my-avatar").src = currentUser.profilePic || "https://via.placeholder.com/42";
+                        if(currentUser.role === 'admin') document.getElementById("btn-admin-panel").classList.remove("hidden");
+                        
+                        document.getElementById("main-dashboard").classList.add("active");
+                        loadChats();
+                    }
+                }).catch(err => alert("Firestore Error: " + err.message));
+            } else {
+                document.getElementById("login-screen").classList.add("active");
+            }
+        });
+
+        document.getElementById("login-form").onsubmit = (e) => {
+            e.preventDefault();
+            const uName = document.getElementById("username").value.trim().toLowerCase();
+            const pass = document.getElementById("password").value;
+            auth.signInWithEmailAndPassword(`${uName}@chatplus.com`, pass).catch(err => alert("Login Failed: " + err.message));
+        };
+
+        // 🌌 Realtime Syncing Engine
+        function loadChats() {
+            db.collection("chats").onSnapshot(snapshot => {
+                const container = document.getElementById("chat-list-container");
+                container.innerHTML = "";
+                snapshot.forEach(doc => {
+                    const chat = doc.data();
+                    chat.id = doc.id;
+                    
+                    if (chat.members.includes(currentUser.username)) {
+                        let name = chat.name || chat.members.find(m => m !== currentUser.username);
+                        let pic = chat.pic || "https://via.placeholder.com/50";
+
+                        const item = document.createElement("div");
+                        item.className = `chat-item ${currentChatId === chat.id ? 'active-item' : ''}`;
+                        item.innerHTML = `
+                            <img src="${pic}">
+                            <div class="chat-info">
+                                <div class="chat-name-time"><h4>${name}</h4></div>
+                                <div class="chat-last-msg"><p>${chat.lastMessage || 'No transmissions'}</p></div>
+                            </div>
+                        `;
+                        item.onclick = () => openChatBox(chat, name, pic);
+                        container.appendChild(item);
+                    }
+                });
+            }, err => alert("Snapshot blockage: " + err.message));
+        }
+
+        function openChatBox(chat, name, pic) {
+            currentChatId = chat.id;
+            document.getElementById("active-chat-info").innerHTML = `<img src="${pic}"><h4>${name}</h4>`;
+            document.querySelector(".app-container").classList.add("chat-open");
+
+            // Refresh active chat highlights
+            loadChats();
+
+            if (activeUnsubscribe) activeUnsubscribe();
+
+            activeUnsubscribe = db.collection("messages")
+                .where("chatId", "==", currentChatId)
+                .orderBy("timestamp", "asc")
+                .onSnapshot(snapshot => {
+                    const box = document.getElementById("message-container");
+                    box.innerHTML = "";
+                    snapshot.forEach(doc => {
+                        const msg = doc.data();
+                        const div = document.createElement("div");
+                        div.className = `message ${msg.senderId === currentUser.username ? 'outgoing' : 'incoming'}`;
+                        
+                        let body = `<p>${msg.text}</p>`;
+                        if (msg.mediaUrl) {
+                            body = msg.mediaType === 'image' ? `<img src="${msg.mediaUrl}" style="max-width:220px; border-radius:12px; box-shadow:0 4px 10px rgba(0,0,0,0.3);">` : `<video src="${msg.mediaUrl}" controls style="max-width:220px; border-radius:12px;"></video>`;
+                        }
+
+                        div.innerHTML = `<div class="msg-bubble">${body}</div>`;
+                        box.appendChild(div);
+                    });
+                    box.scrollTop = box.scrollHeight;
+                });
+        }
+
+        // ✉️ Message Dispatch Pipeline
+        document.getElementById("btn-send").onclick = () => sendMessage();
+        document.getElementById("msg-input").onkeypress = (e) => { if(e.key === 'Enter') sendMessage(); };
+
+        async function sendMessage() {
+            const text = document.getElementById("msg-input").value.trim();
+            const file = document.getElementById("media-input").files[0];
+            if (!text && !file) return;
+
+            document.getElementById("msg-input").value = "";
+            let url = null, type = null;
+
+            if(file) {
+                url = await uploadFile(file);
+                type = file.type.split('/')[0];
+            }
+
+            const payload = {
+                chatId: currentChatId,
+                senderId: currentUser.username,
+                text: text,
+                mediaUrl: url,
+                mediaType: type,
+                timestamp: firebase.firestore.FieldValue.serverTimestamp()
+            };
+
+            db.collection("messages").add(payload);
+            db.collection("chats").doc(currentChatId).update({ lastMessage: text || "⚡ Interactive Media" });
+            document.getElementById("media-input").value = "";
+        }
+
+        // 🛠️ Dynamic Self Profiles Updater
+        document.getElementById("btn-my-profile").onclick = () => document.getElementById("profile-modal").classList.add("active");
+        document.getElementById("close-profile").onclick = () => document.getElementById("profile-modal").classList.remove("active");
+
+        document.getElementById("btn-save-profile").onclick = async () => {
+            const file = document.getElementById("edit-my-pic").files[0];
+            const pass = document.getElementById("change-my-pass").value;
+            
+            let newUrl = currentUser.profilePic || "";
+            if(file) {
+                alert("Uploading fresh avatar directly to Cloudinary...");
+                newUrl = await uploadFile(file);
+            }
+
+            db.collection("users").doc(currentUser.uid).update({ profilePic: newUrl }).then(() => {
+                if(pass) auth.currentUser.updatePassword(pass);
+                alert("Profile configuration synchronized!");
+                location.reload();
+            });
+        };
+
+        // 👑 Matrix Admin Controller
+        document.getElementById("btn-create-user").onclick = async () => {
+            const name = document.getElementById("new-user-name").value;
+            const username = document.getElementById("new-user-username").value.trim().toLowerCase();
+            const pass = document.getElementById("new-user-pass").value;
+            const file = document.getElementById("new-user-pic").files[0];
+
+            if(!name || !username || !pass) return alert("Fill all terminal blocks!");
+
+            let picUrl = "https://via.placeholder.com/50";
+            if(file) { alert("Uploading User Avatar..."); picUrl = await uploadFile(file); }
+
+            const secApp = firebase.initializeApp(firebaseConfig, "SecondaryEngine");
+            secApp.auth().createUserWithEmailAndPassword(`${username}@chatplus.com`, pass).then(cred => {
+                db.collection("users").doc(cred.user.uid).set({
+                    name: name, username: username, role: "user", profilePic: picUrl
+                });
+                db.collection("chats").add({
+                    type: "direct", members: [currentUser.username, username], lastMessage: "Secure link established."
+                });
+                alert("User deployed into server!");
+                document.getElementById("admin-modal").classList.remove("active");
+                secApp.delete();
+            }).catch(e => alert(e.message));
+        };
+
+        document.getElementById("btn-create-group").onclick = async () => {
+            const name = document.getElementById("group-name").value;
+            const file = document.getElementById("group-pic").files[0];
+            const members = document.getElementById("group-members").value.split(",").map(m => m.trim());
+            members.push(currentUser.username);
+
+            if(!name) return alert("Set Group ID Name!");
+
+            let picUrl = "https://via.placeholder.com/50";
+            if(file) { alert("Uploading Group Banner Avatar..."); picUrl = await uploadFile(file); }
+
+            db.collection("chats").add({
+                name: name, pic: picUrl, type: "group", members: members, lastMessage: "Nexus Node Created."
+            }).then(() => {
+                alert("Group Matrix Online!");
+                document.getElementById("admin-modal").classList.remove("active");
+            });
+        };
+
+        // UI View Port Controls
+        document.getElementById("btn-back-to-list").onclick = () => document.querySelector(".app-container").classList.remove("chat-open");
+        document.getElementById("btn-admin-panel").onclick = () => document.getElementById("admin-modal").classList.add("active");
+        document.getElementById("close-admin").onclick = () => document.getElementById("admin-modal").classList.remove("active");
+        document.getElementById("btn-logout").onclick = () => auth.signOut().then(() => location.reload());
+    </script>
 </body>
 </html>
-
+        
