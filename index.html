@@ -1,0 +1,1800 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>VECTOR LINK // CYBERPUNK REAL-TIME NETWORK</title>
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Orbitron:wght@400;700;900&display=swap');
+
+        /* =========================================================================
+           🎨 CHAPTER 1: INTENSIVE UI/UX ARCHITECTURE & GLOBAL TOKENS
+           ========================================================================= */
+        :root {
+            --neon-cyan: #00f2fe;
+            --neon-pink: #fe019a;
+            --neon-purple: #7f00ff;
+            --bg-cyber-dark: linear-gradient(135deg, #090613 0%, #110c22 50%, #030206 100%);
+            --glass-card: rgba(18, 13, 34, 0.65);
+            --glass-border: rgba(255, 255, 255, 0.06);
+            --text-neon-white: #f5f2fb;
+            --text-cyber-muted: #888dbf;
+            --neon-green: #39ff14;
+            
+            --glow-cyan: 0 0 15px #00f2fe, 0 0 5px #00f2fe;
+            --glow-pink: 0 0 15px #fe019a, 0 0 5px #fe019a;
+            --glow-purple: 0 0 15px #7f00ff, 0 0 5px #7f00ff;
+            --glow-green: 0 0 12px #39ff14, 0 0 4px #39ff14;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            user-select: none;
+        }
+
+        body {
+            background: var(--bg-cyber-dark);
+            color: var(--text-neon-white);
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            height: 100vh;
+            width: 100vw;
+            overflow: hidden;
+            position: relative;
+        }
+
+        h1, h2, h3, h4, .cyber-heading, button, .username-token {
+            font-family: 'Orbitron', sans-serif;
+            letter-spacing: 1px;
+        }
+
+        /* Webkit Scrollbar Customization */
+        ::-webkit-scrollbar {
+            width: 5px;
+            height: 5px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: var(--neon-purple);
+            border-radius: 10px;
+            box-shadow: 0 0 8px var(--neon-purple);
+        }
+
+        /* Utility Glitch / Neon Classes */
+        .neon-text-cyan { color: var(--neon-cyan); text-shadow: var(--glow-cyan); }
+        .neon-text-pink { color: var(--neon-pink); text-shadow: var(--glow-pink); }
+        .neon-text-purple { color: var(--neon-purple); text-shadow: var(--glow-purple); }
+
+        /* =========================================================================
+           ⚡ SPLASH SCREEN INTERIOR ARCHITECTURE
+           ========================================================================= */
+        #splash-screen {
+            position: fixed;
+            top: 0; left: 0; width: 100vw; height: 100vh;
+            background: #030206;
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            transition: opacity 0.6s cubic-bezier(0.25, 1, 0.5, 1), visibility 0.6s;
+        }
+        #splash-screen.hidden {
+            opacity: 0;
+            visibility: hidden;
+        }
+        .splash-logo {
+            font-size: 5rem;
+            color: var(--neon-cyan);
+            animation: logoPulseSpin 2.5s infinite ease-in-out;
+            margin-bottom: 25px;
+        }
+        .splash-title {
+            font-size: 1.8rem;
+            text-transform: uppercase;
+            font-weight: 900;
+            margin-bottom: 10px;
+        }
+        .splash-loader-bar {
+            width: 220px;
+            height: 3px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            overflow: hidden;
+            position: relative;
+            box-shadow: 0 0 10px rgba(0, 242, 254, 0.2);
+        }
+        .splash-loader-fill {
+            position: absolute;
+            top: 0; left: -100%;
+            width: 100%; height: 100%;
+            background: linear-gradient(90deg, transparent, var(--neon-cyan), transparent);
+            animation: subLoader 1.8s infinite linear;
+        }
+        @keyframes logoPulseSpin {
+            0% { transform: scale(1) rotate(0deg); text-shadow: var(--glow-cyan); }
+            50% { transform: scale(1.12) rotate(180deg); text-shadow: var(--glow-pink); color: var(--neon-pink); }
+            100% { transform: scale(1) rotate(360deg); text-shadow: var(--glow-cyan); }
+        }
+        @keyframes subLoader {
+            0% { left: -100%; }
+            100% { left: 100%; }
+        }
+
+        /* =========================================================================
+           🛡️ AUTHENTICATION INTERFACE (USERNAMED PIPELINE)
+           ========================================================================= */
+        #auth-container {
+            position: fixed;
+            top: 0; left: 0; width: 100vw; height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 8000;
+            background: var(--bg-cyber-dark);
+            background-image: radial-gradient(rgba(0, 242, 254, 0.08) 1px, transparent 1px);
+            background-size: 32px 32px;
+        }
+        #auth-container.hidden { display: none !important; }
+        .auth-card {
+            width: 100%;
+            max-width: 420px;
+            padding: 40px;
+            border-radius: 24px;
+            backdrop-filter: blur(28px);
+            -webkit-backdrop-filter: blur(28px);
+            background: var(--glass-card);
+            border: 1px solid var(--glass-border);
+            box-shadow: 0 20px 50px rgba(0,0,0,0.3);
+            position: relative;
+            overflow: hidden;
+        }
+        .auth-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 4px;
+            background: linear-gradient(90deg, var(--neon-cyan), var(--neon-pink));
+        }
+        .auth-header {
+            text-align: center;
+            margin-bottom: 35px;
+        }
+        .auth-header h2 {
+            font-size: 1.8rem;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+        .auth-header p {
+            font-size: 0.85rem;
+            color: var(--text-cyber-muted);
+            margin-top: 5px;
+        }
+        .input-group {
+            position: relative;
+            margin-bottom: 24px;
+        }
+        .input-group i {
+            position: absolute;
+            left: 18px; top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-cyber-muted);
+            transition: color 0.3s;
+        }
+        .cyber-input {
+            width: 100%;
+            padding: 16px 16px 16px 50px;
+            background: rgba(0, 0, 0, 0.45);
+            border: 1px solid var(--glass-border);
+            border-radius: 12px;
+            color: #fff;
+            font-size: 0.95rem;
+            outline: none;
+            transition: all 0.25s ease;
+        }
+        .cyber-input:focus {
+            border-color: var(--neon-pink);
+            box-shadow: 0 0 15px rgba(254, 1, 154, 0.3);
+        }
+        .cyber-input:focus + i {
+            color: var(--neon-pink);
+            text-shadow: var(--glow-pink);
+        }
+        .cyber-btn {
+            width: 100%;
+            padding: 16px;
+            background: linear-gradient(135deg, var(--neon-purple) 0%, #5200cc 100%);
+            border: none;
+            border-radius: 12px;
+            color: #fff;
+            font-size: 1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 15px rgba(127, 0, 255, 0.3);
+            text-transform: uppercase;
+        }
+        .cyber-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--glow-purple);
+        }
+        .cyber-btn:active {
+            transform: translateY(1px);
+        }
+
+        /* =========================================================================
+           🖥️ CHAPTER 2: CORE DASHBOARD MASTER GRID LAYOUT
+           ========================================================================= */
+        #dashboard-wrapper {
+            display: grid;
+            grid-template-columns: 360px 1fr;
+            width: 100vw;
+            height: 100vh;
+            overflow: hidden;
+        }
+        #dashboard-wrapper.hidden { display: none !important; }
+
+        /* =========================================================================
+           🏛️ SIDEBAR ARCHITECTURE (LEFT NODE)
+           ========================================================================= */
+        .sidebar {
+            background: rgba(12, 8, 24, 0.8);
+            border-right: 1px solid var(--glass-border);
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            position: relative;
+            z-index: 100;
+        }
+        .sidebar-header {
+            height: 70px;
+            padding: 0 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid var(--glass-border);
+            background: rgba(6, 4, 12, 0.5);
+        }
+        .current-user-profile {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .avatar-container {
+            position: relative;
+            width: 44px;
+            height: 44px;
+        }
+        .user-avatar {
+            width: 100%; height: 100%;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid var(--neon-cyan);
+            box-shadow: var(--glow-cyan);
+        }
+        .current-user-name {
+            font-size: 0.95rem;
+            font-weight: 700;
+            max-width: 140px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .header-actions {
+            display: flex;
+            gap: 15px;
+            font-size: 1.1rem;
+        }
+        .action-icon-btn {
+            color: var(--text-cyber-muted);
+            cursor: pointer;
+            transition: all 0.25s ease;
+        }
+        .action-icon-btn:hover {
+            color: var(--neon-cyan);
+            text-shadow: var(--glow-cyan);
+            transform: scale(1.1);
+        }
+        .admin-trigger { color: var(--neon-pink); display: none; }
+        .admin-trigger:hover { text-shadow: var(--glow-pink); color: var(--neon-pink) !important;}
+
+        /* Search Area Box */
+        .search-zone {
+            height: 60px;
+            padding: 10px 16px;
+            display: flex;
+            align-items: center;
+            border-bottom: 1px solid var(--glass-border);
+        }
+        .search-wrapper {
+            position: relative;
+            width: 100%;
+        }
+        .search-wrapper i {
+            position: absolute;
+            left: 14px; top: 50%;
+            transform: translateY(-50%);
+            color: var(--neon-cyan);
+        }
+        .search-wrapper input {
+            width: 100%;
+            padding: 10px 10px 10px 40px;
+            background: rgba(0,0,0,0.3);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            color: #fff;
+            outline: none;
+            font-size: 0.85rem;
+            transition: all 0.3s;
+        }
+        .search-wrapper input:focus {
+            border-color: var(--neon-cyan);
+            box-shadow: 0 0 10px rgba(0, 242, 254, 0.2);
+        }
+
+        /* Live Chat Node List Container */
+        .live-chat-list {
+            flex-grow: 1;
+            overflow-y: auto;
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .chat-item-node {
+            display: flex;
+            align-items: center;
+            padding: 12px;
+            border-radius: 14px;
+            background: var(--glass-card);
+            border: 1px solid var(--glass-border);
+            cursor: pointer;
+            transition: all 0.25s ease;
+            position: relative;
+        }
+        .chat-item-node:hover {
+            background: rgba(255,255,255,0.03);
+            transform: translateX(3px);
+        }
+        .chat-item-node.active-chat-item {
+            border-color: var(--neon-purple);
+            box-shadow: 0 0 20px rgba(127, 0, 255, 0.35);
+            background: rgba(127, 0, 255, 0.08);
+        }
+        .node-avatar {
+            width: 50px; height: 50px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin-right: 14px;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        .node-info-block {
+            flex-grow: 1;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+        .node-meta-line {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .node-name {
+            font-size: 0.92rem;
+            font-weight: 700;
+            color: var(--text-neon-white);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .node-timestamp {
+            font-size: 0.7rem;
+            color: var(--text-cyber-muted);
+        }
+        .node-preview-msg {
+            font-size: 0.8rem;
+            color: var(--text-cyber-muted);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .unread-badge {
+            background: var(--neon-pink);
+            color: #fff;
+            font-size: 0.7rem;
+            font-weight: 700;
+            padding: 3px 7px;
+            border-radius: 20px;
+            min-width: 18px;
+            text-align: center;
+            animation: badgePulse 2s infinite ease-in-out;
+        }
+        @keyframes badgePulse {
+            0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(254, 1, 154, 0.6); }
+            70% { transform: scale(1.08); box-shadow: 0 0 0 8px rgba(254, 1, 154, 0); }
+            100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(254, 1, 154, 0); }
+        }
+
+        /* Branding Footer Inside Sidebar */
+        .sidebar-brand-footer {
+            height: 35px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-top: 1px solid var(--glass-border);
+            font-size: 0.65rem;
+            font-family: 'Orbitron', sans-serif;
+            color: var(--text-cyber-muted);
+            letter-spacing: 2px;
+            background: rgba(0,0,0,0.2);
+        }
+
+        /* =========================================================================
+           🌌 CHAT WINDOW MASTER FRAMEWORK (RIGHT PANEL)
+           ========================================================================= */
+        .chat-window {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            background-image: radial-gradient(rgba(0, 242, 254, 0.05) 1px, transparent 1px);
+            background-size: 24px 24px;
+            position: relative;
+            background-color: #0d091a;
+        }
+        
+        /* Null Screen State Overlay */
+        .null-chat-overlay {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background: #0d091a;
+            z-index: 50;
+            gap: 15px;
+        }
+        .null-chat-overlay.hidden { display: none !important; }
+        .null-vector-icon {
+            font-size: 4rem;
+            color: var(--neon-cyan);
+            text-shadow: var(--glow-cyan);
+            animation: vectorPulse 3s infinite linear;
+        }
+        .null-vector-text {
+            font-size: 1rem;
+            font-weight: 700;
+            letter-spacing: 2px;
+            color: var(--text-cyber-muted);
+        }
+        @keyframes vectorPulse {
+            0%, 100% { opacity: 0.6; transform: scale(1); }
+            50% { opacity: 1; transform: scale(1.05); }
+        }
+
+        /* Chat Window Header */
+        .chat-header {
+            height: 70px;
+            padding: 0 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid var(--neon-cyan);
+            box-shadow: 0 4px 20px rgba(0, 242, 254, 0.08);
+            background: rgba(18, 13, 34, 0.8);
+            z-index: 10;
+        }
+        .chat-header-meta {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+        .mobile-back-btn {
+            display: none;
+            font-size: 1.2rem;
+            color: var(--neon-cyan);
+            cursor: pointer;
+            margin-right: 8px;
+        }
+        .active-room-avatar {
+            width: 46px; height: 46px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 1px solid var(--neon-cyan);
+        }
+        .active-room-details {
+            display: flex;
+            flex-direction: column;
+        }
+        .active-room-name {
+            font-size: 1.05rem;
+            font-weight: 700;
+        }
+        .online-status-tracker {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.65rem;
+            font-weight: 700;
+            font-family: 'Orbitron', sans-serif;
+            margin-top: 2px;
+            letter-spacing: 0.5px;
+        }
+        .status-dot {
+            width: 6px; height: 6px;
+            border-radius: 50%;
+        }
+        .status-dot.online { background: var(--neon-green); box-shadow: var(--glow-green); }
+        .status-dot.offline { background: #5a5d7c; }
+        
+        /* Dropdown Action Controls */
+        .header-dropdown-wrapper {
+            position: relative;
+        }
+        .dropdown-menu-list {
+            position: absolute;
+            right: 0; top: 40px;
+            width: 180px;
+            background: rgba(14, 10, 26, 0.95);
+            border: 1px solid var(--glass-border);
+            border-radius: 12px;
+            backdrop-filter: blur(20px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            display: none;
+            flex-direction: column;
+            overflow: hidden;
+            z-index: 200;
+        }
+        .dropdown-menu-list.show { display: flex; }
+        .dropdown-item {
+            padding: 12px 16px;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .dropdown-item:hover {
+            background: var(--neon-pink);
+            color: #fff;
+        }
+
+        /* Real-Time Message Board Arena */
+        .message-board-arena {
+            flex-grow: 1;
+            overflow-y: auto;
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 18px;
+            background: rgba(10, 7, 20, 0.4);
+        }
+
+        /* Core Message Bubble Mechanics */
+        .msg-row-container {
+            display: flex;
+            width: 100%;
+        }
+        .msg-row-container.incoming-type { justify-content: flex-start; }
+        .msg-row-container.outgoing-type { justify-content: flex-start; flex-direction: row-reverse; }
+        
+        .bubble-wrapper {
+            max-width: 65%;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+        .group-sender-identity {
+            font-size: 0.75rem;
+            font-weight: 700;
+            font-family: 'Orbitron', sans-serif;
+            margin-left: 4px;
+            margin-bottom: 2px;
+        }
+        .msg-bubble-core {
+            padding: 12px 18px;
+            font-size: 0.95rem;
+            line-height: 1.5;
+            position: relative;
+            word-break: break-word;
+        }
+        
+        /* Incoming Specific Bubble Blueprint */
+        .incoming-type .msg-bubble-core {
+            background: rgba(22, 17, 38, 0.85);
+            border: 1px solid var(--glass-border);
+            border-left: 3px solid var(--neon-cyan);
+            border-radius: 18px;
+            border-top-left-radius: 3px;
+            color: var(--text-neon-white);
+        }
+        /* Outgoing Specific Bubble Blueprint */
+        .outgoing-type .msg-bubble-core {
+            background: linear-gradient(135deg, var(--neon-pink) 0%, var(--neon-purple) 100%);
+            border-radius: 18px;
+            border-top-right-radius: 3px;
+            color: #fff;
+            box-shadow: 0 6px 18px rgba(254, 1, 154, 0.2);
+        }
+
+        /* Media Rendering Box */
+        .bubble-media-wrapper {
+            max-width: 260px;
+            border-radius: 12px;
+            overflow: hidden;
+            border: 1px solid rgba(255,255,255,0.1);
+            margin-bottom: 4px;
+            transition: transform 0.2s ease;
+            cursor: pointer;
+        }
+        .bubble-media-wrapper:hover {
+            transform: scale(1.02);
+        }
+        .bubble-media-wrapper img, .bubble-media-wrapper video {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+
+        .msg-meta-timestamp-line {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 0.68rem;
+            color: var(--text-cyber-muted);
+            margin-top: 2px;
+        }
+        .incoming-type .msg-meta-timestamp-line { justify-content: flex-start; }
+        .outgoing-type .msg-meta-timestamp-line { justify-content: flex-end; }
+        .double-tick-icon {
+            color: var(--neon-cyan);
+            font-size: 0.75rem;
+        }
+
+        /* Dynamic Date Divider Ribbon */
+        .central-date-divider {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 15px 0;
+            width: 100%;
+        }
+        .date-ribbon-tag {
+            padding: 6px 16px;
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            font-size: 0.7rem;
+            font-family: 'Orbitron', sans-serif;
+            color: var(--text-cyber-muted);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            backdrop-filter: blur(10px);
+        }
+
+        /* =========================================================================
+           🛠️ INPUT TRANSMISSION FOOTER INTERIOR
+           ========================================================================= */
+        .chat-footer-controls {
+            height: 70px;
+            padding: 0 20px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            border-top: 1px solid var(--glass-border);
+            background: rgba(14, 10, 26, 0.85);
+            backdrop-filter: blur(20px);
+            z-index: 10;
+        }
+        .attachment-trigger-btn {
+            width: 44px; height: 44px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.04);
+            border: 1px solid var(--glass-border);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: var(--neon-cyan);
+            cursor: pointer;
+            font-size: 1.1rem;
+            transition: all 0.25s;
+        }
+        .attachment-trigger-btn:hover {
+            border-color: var(--neon-cyan);
+            box-shadow: var(--glow-cyan);
+            transform: scale(1.05);
+        }
+        .input-capsule-wrapper {
+            flex-grow: 1;
+            position: relative;
+        }
+        .message-capsule-input {
+            width: 100%;
+            height: 46px;
+            border-radius: 35px;
+            padding: 0 24px;
+            background: rgba(0, 0, 0, 0.45);
+            border: 1px solid var(--glass-border);
+            color: #fff;
+            font-size: 0.92rem;
+            outline: none;
+            transition: all 0.25s ease;
+        }
+        .message-capsule-input:focus {
+            border-color: var(--neon-pink);
+            box-shadow: 0 0 15px rgba(254, 1, 154, 0.25);
+        }
+        .transmission-send-btn {
+            width: 44px; height: 44px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--neon-purple) 0%, #5200cc 100%);
+            border: none;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: #fff;
+            cursor: pointer;
+            font-size: 1.05rem;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        .transmission-send-btn:hover {
+            transform: scale(1.15);
+            box-shadow: var(--glow-purple);
+        }
+
+        /* =========================================================================
+           🌓 MODAL FLOATING PANELS ARCHITECTURE (GENERIC & ALERTS)
+           ========================================================================= */
+        .floating-modal-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100vw; height: 100vh;
+            background: rgba(3, 2, 6, 0.8);
+            backdrop-filter: blur(12px);
+            z-index: 9000;
+            display: none;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        .floating-modal-overlay.open { display: flex; }
+        .modal-surface-card {
+            width: 100%;
+            max-width: 460px;
+            background: var(--glass-card);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            padding: 30px;
+            position: relative;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+        }
+        .modal-close-cross {
+            position: absolute;
+            top: 20px; right: 20px;
+            color: var(--text-cyber-muted);
+            cursor: pointer;
+            font-size: 1.2rem;
+            transition: color 0.2s;
+        }
+        .modal-close-cross:hover { color: var(--neon-pink); }
+        .modal-surface-card h3 {
+            font-size: 1.4rem;
+            margin-bottom: 25px;
+            text-transform: uppercase;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            padding-bottom: 10px;
+        }
+        .form-row-node {
+            margin-bottom: 20px;
+        }
+        .form-row-node label {
+            display: block;
+            font-size: 0.75rem;
+            font-family: 'Orbitron', sans-serif;
+            color: var(--text-cyber-muted);
+            margin-bottom: 8px;
+            text-transform: uppercase;
+        }
+        .form-select-node {
+            width: 100%;
+            padding: 14px;
+            background: rgba(0,0,0,0.4);
+            border: 1px solid var(--glass-border);
+            border-radius: 10px;
+            color: #fff;
+            outline: none;
+        }
+        .form-select-node option {
+            background: #110c22;
+            color: #fff;
+        }
+
+        /* Live Neon Cyber Toast Engine */
+        #toast-notification-hub {
+            position: fixed;
+            bottom: 85px; right: 25px;
+            z-index: 10000;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            pointer-events: none;
+        }
+        .cyber-toast-node {
+            padding: 14px 24px;
+            border-radius: 10px;
+            background: rgba(14, 10, 26, 0.95);
+            border-left: 4px solid var(--neon-pink);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+            color: #fff;
+            font-size: 0.9rem;
+            font-weight: 500;
+            animation: slideInToast 0.3s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+            pointer-events: auto;
+        }
+        @keyframes slideInToast {
+            0% { transform: translateX(120%); opacity: 0; }
+            100% { transform: translateX(0); opacity: 1; }
+        }
+
+        /* =========================================================================
+           📱 MOBILE FIRST RESPONSIVE ENGINE
+           ========================================================================= */
+        @media (max-width: 768px) {
+            #dashboard-wrapper {
+                grid-template-columns: 1fr;
+            }
+            .sidebar {
+                display: flex;
+                width: 100vw;
+                height: 100vh;
+            }
+            .chat-window {
+                display: none !important;
+                width: 100vw;
+                height: 100vh;
+                position: absolute;
+                top: 0; left: 0;
+                z-index: 500;
+            }
+            
+            /* Class injection handler for active messaging state */
+            body.chat-active-mode .sidebar {
+                display: none !important;
+            }
+            body.chat-active-mode .chat-window {
+                display: flex !important;
+            }
+            .mobile-back-btn {
+                display: block;
+            }
+            .bubble-wrapper {
+                max-width: 82%;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div id="splash-screen">
+        <i class="fa-solid fa-bolt-lightning splash-logo"></i>
+        <div class="splash-title neon-text-cyan">VECTOR LINK v1.2</div>
+        <div class="splash-loader-bar">
+            <div class="splash-loader-fill"></div>
+        </div>
+    </div>
+
+    <div id="auth-container" class="hidden">
+        <div class="auth-card">
+            <div class="auth-header">
+                <h2 class="neon-text-pink">SYSTEM ACCESS</h2>
+                <p>Establish cryptographic mainframe terminal</p>
+            </div>
+            <form id="auth-crypto-form">
+                <div class="input-group">
+                    <input type="text" id="auth-username-field" class="cyber-input" placeholder="Encryption Node Username" required autocomplete="username">
+                    <i class="fa-solid fa-terminal"></i>
+                </div>
+                <div class="input-group">
+                    <input type="password" id="auth-password-field" class="cyber-input" placeholder="Access Matrix Password" required autocomplete="current-password">
+                    <i class="fa-solid fa-shield-halved"></i>
+                </div>
+                <button type="submit" class="cyber-btn">INITIALIZE PROTOCOL</button>
+            </form>
+        </div>
+    </div>
+
+    <div id="dashboard-wrapper" class="hidden">
+        
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="current-user-profile">
+                    <div class="avatar-container">
+                        <img id="my-profile-avatar" src="https://via.placeholder.com/150/00f2fe/000000?text=NODE" class="user-avatar" alt="Avatar">
+                    </div>
+                    <span id="my-profile-name" class="current-user-name">Loading Node...</span>
+                </div>
+                <div class="header-actions">
+                    <i id="admin-panel-trigger" class="fa-solid fa-shield-cat action-icon-btn admin-trigger" title="Admin Engine Console"></i>
+                    <i id="profile-edit-trigger" class="fa-solid fa-gear action-icon-btn" title="Configuration Panel"></i>
+                    <i id="system-logout-btn" class="fa-solid fa-power-off action-icon-btn" title="Sever Session Matrix"></i>
+                </div>
+            </div>
+            
+            <div class="search-zone">
+                <div class="search-wrapper">
+                    <i class="fa-solid fa-magnifying-glass"></i>
+                    <input type="text" id="node-search-field" placeholder="Search encrypted nodes...">
+                </div>
+            </div>
+            
+            <div id="live-channels-stream-container" class="live-chat-list"></div>
+            
+            <div class="sidebar-brand-footer">Developed by UTSAB SARKER</div>
+        </aside>
+
+        <main class="chat-window">
+            
+            <div id="null-state-channel-block" class="null-chat-overlay">
+                <i class="fa-solid fa-circle-nodes null-vector-icon"></i>
+                <div class="null-vector-text">🔥 VECTOR LINK ESTABLISHED. SELECT A NODE TO CHAT.</div>
+            </div>
+
+            <div class="chat-header">
+                <div class="chat-header-meta">
+                    <i id="mobile-back-vector-btn" class="fa-solid fa-chevron-left mobile-back-btn"></i>
+                    <img id="active-channel-image-node" src="https://via.placeholder.com/150" class="active-room-avatar" alt="Channel Identity">
+                    <div class="active-room-details">
+                        <span id="active-channel-title-text" class="active-room-name">Secure Mainframe Frame</span>
+                        <div class="online-status-tracker">
+                            <div id="active-channel-status-dot" class="status-dot offline"></div>
+                            <span id="active-channel-status-label">OFFLINE</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="header-dropdown-wrapper">
+                    <i id="channel-dropdown-trigger" class="fa-solid fa-ellipsis-vertical action-icon-btn"></i>
+                    <div id="channel-context-menu-list" class="dropdown-menu-list">
+                        <div id="ctx-clear-chat-btn" class="dropdown-item"><i class="fa-solid fa-eraser"></i> Clear Node Chat</div>
+                        <div id="ctx-block-node-btn" class="dropdown-item"><i class="fa-solid fa-ban"></i> Block Stream</div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="realtime-message-board-container" class="message-board-arena"></div>
+
+            <div class="chat-footer-controls">
+                <div id="attachment-click-trigger" class="attachment-trigger-btn">
+                    <i class="fa-solid fa-plus"></i>
+                </div>
+                <div class="input-capsule-wrapper">
+                    <input type="text" id="payload-message-input" class="message-capsule-input" placeholder="Type a cyberpunk message...">
+                </div>
+                <button id="payload-transmission-submit-btn" class="transmission-send-btn">
+                    <i class="fa-solid fa-paper-plane"></i>
+                </button>
+            </div>
+        </main>
+    </div>
+
+    <div id="profile-customizer-modal-layer" class="floating-modal-overlay">
+        <div class="modal-surface-card">
+            <i class="fa-solid fa-xmark modal-close-cross close-modal-generic-btn"></i>
+            <h3><span class="neon-text-cyan">// NODE CONFIGURATION</span></h3>
+            <form id="profile-update-crypto-form">
+                <div class="form-row-node">
+                    <label>Display Identity Name</label>
+                    <input type="text" id="profile-name-input-node" class="cyber-input" style="padding-left:16px;">
+                </div>
+                <div class="form-row-node">
+                    <label>Modify Transmission Avatar</label>
+                    <input type="file" id="profile-avatar-file-node" accept="image/*" class="cyber-input" style="padding-left:16px; font-size:0.8rem;">
+                </div>
+                <div class="form-row-node">
+                    <label>Update Cipher Access Password (Optional)</label>
+                    <input type="password" id="profile-password-input-node" class="cyber-input" style="padding-left:16px;" placeholder="Leave blank to maintain matrix token">
+                </div>
+                <button type="submit" class="cyber-btn" style="margin-top:10px;">COMMIT CHANGES</button>
+            </form>
+        </div>
+    </div>
+
+    <div id="admin-mainframe-modal-layer" class="floating-modal-overlay">
+        <div class="modal-surface-card">
+            <i class="fa-solid fa-xmark modal-close-cross close-modal-generic-btn"></i>
+            <h3><span class="neon-text-pink">// SECURE ADMIN CONSOLE</span></h3>
+            
+            <div class="form-row-node">
+                <label>Operational Task</label>
+                <select id="admin-task-selector" class="form-select-node">
+                    <option value="provision-user">PROVISION NEW NETWORK USER NODE</option>
+                    <option value="forge-group">FORGE CHANNELS VECTOR GROUP CHAT</option>
+                </select>
+            </div>
+
+            <div id="sub-frame-provision-user-node">
+                <form id="admin-user-provision-form">
+                    <div class="form-row-node">
+                        <label>Unique Matrix Username</label>
+                        <input type="text" id="adm-username" class="cyber-input" style="padding-left:16px;" required placeholder="e.g. jason_core">
+                    </div>
+                    <div class="form-row-node">
+                        <label>Full Name</label>
+                        <input type="text" id="adm-fullname" class="cyber-input" style="padding-left:16px;" required placeholder="e.g. Jason Bourne">
+                    </div>
+                    <div class="form-row-node">
+                        <label>Access Role Authority Token</label>
+                        <select id="adm-role" class="form-select-node">
+                            <option value="user">USER DATA STREAM ACCESS NODE</option>
+                            <option value="admin">ROOT MAINFRAME ADMINISTRATOR AUTHORITY</option>
+                        </select>
+                    </div>
+                    <div class="form-row-node">
+                        <label>Master Pass Cipher</label>
+                        <input type="password" id="adm-password" class="cyber-input" style="padding-left:16px;" required placeholder="••••••••">
+                    </div>
+                    <button type="submit" class="cyber-btn" style="background: linear-gradient(135deg, var(--neon-pink) 0%, #aa0055 100%); box-shadow:0 4px 15px rgba(254,1,154,0.3)">EXECUTE PROVISIONING</button>
+                </form>
+            </div>
+
+            <div id="sub-frame-forge-group-node" style="display:none;">
+                <form id="admin-group-forge-form">
+                    <div class="form-row-node">
+                        <label>Group Vector Title Designation</label>
+                        <input type="text" id="grp-title" class="cyber-input" style="padding-left:16px;" required placeholder="e.g. CYBER_PUNK_UNDERGROUND">
+                    </div>
+                    <div class="form-row-node">
+                        <label>Target Channel Members Usernames (Comma Delimited List)</label>
+                        <input type="text" id="grp-members" class="cyber-input" style="padding-left:16px;" required placeholder="e.g. rony,sajib,neom_matrix">
+                    </div>
+                    <button type="submit" class="cyber-btn" style="background: linear-gradient(135deg, var(--neon-pink) 0%, #aa0055 100%); box-shadow:0 4px 15px rgba(254,1,154,0.3)">FORGE VECTOR COMPONENT</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <input type="file" id="hidden-media-payload-uploader" accept="image/*,video/*" style="display: none !important;">
+
+    <div id="toast-notification-hub"></div>
+
+
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+
+    <script>
+        // ==========================================
+        // ৩. ফায়ারবেস ও ক্লাউডিনারি কনফিগারেশন 
+        // ==========================================
+        const firebaseConfig = {
+            apiKey: "AIzaSyCFylUIK2wByPd70a4xEg2_8QkqY-MP8WM",
+            authDomain: "chatplus-22012026.firebaseapp.com",
+            projectId: "chatplus-22012026",
+            storageBucket: "chatplus-22012026.firebasestorage.app",
+            messagingSenderId: "530474889688",
+            appId: "1:530474889688:web:38e1545f1ee796a4bf42ad"
+        };
+
+        // Initialize Firebase Global Connection Pointer
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.firestore();
+
+        // Cloudinary Media Transmission Endpoint Pipeline Credentials
+        const CLOUDINARY_URL = "https://api.cloudinary.com/v1_1/zx82me8y/upload";
+        const CLOUDINARY_PRESET = "ChatPlus";
+
+        // =========================================================================
+        // 🧠 RUNTIME SESSION STATE CACHE SYSTEM VARIABLES
+        // =========================================================================
+        let currentUser = null;         // Logged-in local database map cache node
+        let currentChatId = null;       // Active transmission room node vector allocation string
+        let currentChatTargetNode = null; // Mapping target metadata pointer reference 
+        let globalChatsListCache = [];  // Array repository storing live memory room nodes
+        
+        // Active Event Query Snapshot Unsubscribe Engine Method Registries
+        let activeChatsUnsubscribe = null;
+        let activeMessageUnsubscribe = null;
+
+        // =========================================================================
+        // 🛠️ UNIVERSAL TOAST NOTIFICATION OPERATOR
+        // =========================================================================
+        function showCryptoToast(message, duration = 4000) {
+            const hub = document.getElementById('toast-notification-hub');
+            const node = document.createElement('div');
+            node.className = 'cyber-toast-node';
+            node.innerText = `// NETWORK NOTICE: ${message}`;
+            hub.appendChild(node);
+            
+            setTimeout(() => {
+                node.style.transition = 'opacity 0.4s elements, transform 0.4s';
+                node.style.opacity = '0';
+                node.style.transform = 'scale(0.8) translateX(50%)';
+                setTimeout(() => node.remove(), 400);
+            }, duration);
+        }
+
+        // =========================================================================
+        // 🔁 CHAPTER 4.1: GLOBAL ROUTER RESOLVER (ON-AUTH-STATE-CHANGED)
+        // =========================================================================
+        window.addEventListener('DOMContentLoaded', () => {
+            auth.onAuthStateChanged(async (firebaseUser) => {
+                if (firebaseUser) {
+                    try {
+                        // User exists in authentication layer. Retrieve Document Database Profile Token.
+                        const docSnapshot = await db.collection("users").doc(firebaseUser.uid).get();
+                        if (docSnapshot.exists) {
+                            currentUser = docSnapshot.data();
+                            currentUser.uid = firebaseUser.uid; // Cache extension parameter assignment
+                            
+                            // Initialize Client Mainframe Graphical Layout Environment State
+                            initializeDashboardInterface();
+                        } else {
+                            // Account exists but profile is corrupted or absent. Purge session token.
+                            showCryptoToast("CORRUPT PROTOCOL PROFILE DATA NODE DETECTED. PURGING SESSION.");
+                            auth.signOut();
+                        }
+                    } catch (err) {
+                        showCryptoToast(`MAINFRAME ACQUISITION FAILURE: ${err.message}`);
+                        auth.signOut();
+                    }
+                } else {
+                    // Routing pipeline state redirects toward access gateway interface segment
+                    showAuthGate InterfaceContainer();
+                }
+            });
+            
+            // Register Runtime Interface Native Modal Operational Action View Hooks
+            setupOperationalModalEventHandlers();
+        });
+
+        function showAuthGate_InterfaceContainer() {
+            currentUser = null;
+            // Clear current active streams to block leakage memory processing cycles
+            if(activeChatsUnsubscribe) { activeChatsUnsubscribe(); activeChatsUnsubscribe = null; }
+            if(activeMessageUnsubscribe) { activeMessageUnsubscribe(); activeMessageUnsubscribe = null; }
+            
+            document.getElementById('dashboard-wrapper').classList.add('hidden');
+            document.getElementById('auth-container').classList.remove('hidden');
+            document.getElementById('splash-screen').classList.add('hidden');
+        }
+
+        function initializeDashboardInterface() {
+            document.getElementById('auth-container').classList.add('hidden');
+            document.getElementById('dashboard-wrapper').classList.remove('hidden');
+            
+            // Bind Core Client Dynamic Configuration Values
+            document.getElementById('my-profile-name').innerText = currentUser.name.toUpperCase();
+            if(currentUser.profilePic) {
+                document.getElementById('my-profile-avatar').src = currentUser.profilePic;
+            }
+            
+            // Conditional Admin Mainframe Interface Visibility Vector Logic Check
+            if (currentUser.role === 'admin') {
+                document.getElementById('admin-panel-trigger').style.display = 'block';
+            } else {
+                document.getElementById('admin-panel-trigger').style.display = 'none';
+            }
+
+            // Close intermediate operational system states to optimize workspace layout
+            document.getElementById('splash-screen').className = 'hidden';
+            
+            // Initialize Multi-plex Chat Room Real-time Snapshot Pipeline
+            openGlobalChatRoomMultiplexStream();
+        }
+
+        // =========================================================================
+        // 🔐 CHAPTER 4.2: CUSTOM USERNAME AUTHENTICATION CONTROL MATRIX
+        // =========================================================================
+        document.getElementById('auth-crypto-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const rawUsername = document.getElementById('auth-username-field').value;
+            const password = document.getElementById('auth-password-field').value;
+            
+            // Strict sanitization parsing rules normalization deployment strategy
+            const cleanUsername = rawUsername.trim().toLowerCase();
+            const virtualEmail = `${cleanUsername}@chatplus.com`;
+
+            try {
+                document.getElementById('splash-screen').classList.remove('hidden');
+                await auth.signInWithEmailAndPassword(virtualEmail, password);
+                showCryptoToast("VECTOR AUTH SYNC ESTABLISHED. WELCOME USER COMPONENT.");
+            } catch (error) {
+                document.getElementById('splash-screen').classList.add('hidden');
+                showCryptoToast(`CIPHER REJECTION FAILURE: ${error.message}`);
+            }
+        });
+
+        // =========================================================================
+        // 🛰️ CHAPTER 4.3: REAL-TIME MULTIPLEX FIRESTORE CHAT CHANNELS STREAM
+        // =========================================================================
+        function openGlobalChatRoomMultiplexStream() {
+            if(activeChatsUnsubscribe) activeChatsUnsubscribe();
+
+            activeChatsUnsubscribe = db.collection("chats")
+                .where("members", "array-contains", currentUser.username)
+                .orderBy("lastUpdated", "desc")
+                .onSnapshot(async (snapshot) => {
+                    let roomNodesCollector = [];
+                    
+                    // Standard structural traversal iterative parser matrix deployment block
+                    snapshot.forEach((doc) => {
+                        let data = doc.data();
+                        data.id = doc.id;
+                        roomNodesCollector.push(data);
+                    });
+
+                    globalChatsListCache = roomNodesCollector;
+                    
+                    // Render UI representation nodes mapping schema
+                    await compileAndRenderChatListSidebarNodes(roomNodesCollector);
+                }, (error) => {
+                    showCryptoToast(`LIVE LOGIC DATA CHANNELS FAULT: ${error.message}`);
+                });
+        }
+
+        async function compileAndRenderChatListSidebarNodes(roomsList) {
+            const elementBox = document.getElementById('live-channels-stream-container');
+            elementBox.innerHTML = ''; // Wipe stale interface layout segments
+
+            if(roomsList.length === 0) {
+                elementBox.innerHTML = `<div style="text-align:center;font-size:0.8rem;color:var(--text-cyber-muted);margin-top:40px;">// NO ENCRYPTED CHANNELS OPEN</div>`;
+                return;
+            }
+
+            for(let room of roomsList) {
+                let displayName = room.name || "CRYPT LINK NODE";
+                let displayPic = room.pic || "https://via.placeholder.com/150/7f00ff/ffffff?text=GROUP";
+                let isOnlineTargetCheck = false;
+
+                // If Direct Message type, calculate target inverse username identities
+                if (room.type === 'direct') {
+                    const inverseTargetUsername = room.members.find(u => u !== currentUser.username);
+                    
+                    // Fetch dynamic runtime profile token mapping data from database layer reference
+                    const userSnapshot = await db.collection("users").where("username", "==", inverseTargetUsername).get();
+                    if(!userSnapshot.empty) {
+                        const targetData = userSnapshot.docs[0].data();
+                        displayName = targetData.name;
+                        displayPic = targetData.profilePic || `https://via.placeholder.com/150/00f2fe/ffffff?text=${inverseTargetUsername.toUpperCase()}`;
+                    } else {
+                        displayName = `Unknown Node [${inverseTargetUsername}]`;
+                    }
+                }
+
+                // Compile structured HTML string injection token blocks layout layout components
+                const nodeItem = document.createElement('div');
+                nodeItem.className = `chat-item-node ${currentChatId === room.id ? 'active-chat-item' : ''}`;
+                nodeItem.dataset.roomId = room.id;
+
+                // Format Time parameters representation logic
+                let stampString = "...";
+                if(room.lastUpdated) {
+                    const dateObj = room.lastUpdated.toDate();
+                    stampString = dateObj.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                }
+
+                nodeItem.innerHTML = `
+                    <img src="${displayPic}" class="node-avatar" alt="Avatar">
+                    <div class="node-info-block">
+                        <div class="node-meta-line">
+                            <span class="node-name">${displayName}</span>
+                            <span class="node-timestamp">${stampString}</span>
+                        </div>
+                        <div class="node-meta-line" style="margin-top:2px;">
+                            <span class="node-preview-msg">${room.lastMessage || '// LINK IDLE'}</span>
+                        </div>
+                    </div>
+                `;
+
+                // Add active operational router runtime navigation link binding hook
+                nodeItem.addEventListener('click', () => {
+                    activateSelectedChatRoomNodeStream(room.id, displayName, displayPic);
+                });
+
+                elementBox.appendChild(nodeItem);
+            }
+        }
+
+        // =========================================================================
+        // 💬 ACTIVE ROOM MESSAGE DISPATCH ENGINE & EVENT REALTIME DEPLOYMENT
+        // =========================================================================
+        function activateSelectedChatRoomNodeStream(roomId, computedName, computedPic) {
+            currentChatId = roomId;
+            
+            // Apply layout highlights structural modification configurations mapping selectors
+            document.querySelectorAll('.chat-item-node').forEach(elem => {
+                if(elem.dataset.roomId === roomId) elem.classList.add('active-chat-item');
+                else elem.classList.remove('active-chat-item');
+            });
+
+            // Wipe Active Screen Null Layer Layout Overlay
+            document.getElementById('null-state-channel-block').classList.add('hidden');
+            
+            // Map Dynamic Control Headers Properties References
+            document.getElementById('active-channel-title-text').innerText = computedName;
+            document.getElementById('active-channel-image-node').src = computedPic;
+            
+            // Mobile Device Viewport Responsive Mode Trigger Configuration Injection
+            document.body.classList.add('chat-active-mode');
+
+            // Setup online simulation tracker flag attributes parameters assignments
+            document.getElementById('active-channel-status-dot').className = 'status-dot online';
+            document.getElementById('active-channel-status-label').innerText = 'ONLINE';
+
+            // Establish real-time tracking interface data streams listener configuration
+            establishRealtimeMessageBoardListener(roomId);
+        }
+
+        function establishRealtimeMessageBoardListener(roomId) {
+            if(activeMessageUnsubscribe) activeMessageUnsubscribe();
+
+            const arenaBox = document.getElementById('realtime-message-board-container');
+            arenaBox.innerHTML = `<div style="text-align:center;font-size:0.9rem;color:var(--neon-cyan);margin-top:30px;">// SYNCHRONIZING BUFFER STREAM...</div>`;
+
+            // Execute Live Firestore Message Query Stream Engine Chain Router
+            activeMessageUnsubscribe = db.collection("messages")
+                .where("chatId", "==", roomId)
+                .orderBy("timestamp", "asc")
+                .onSnapshot((snapshot) => {
+                    arenaBox.innerHTML = ''; // Erase processing buffers placeholders
+                    
+                    let primaryDateCacheHeaderStr = "";
+
+                    if(snapshot.empty) {
+                        arenaBox.innerHTML = `<div style="text-align:center;font-size:0.8rem;color:var(--text-cyber-muted);margin-top:40px;">// MATRIX LOG VACANT. TRANSMIT INITIAL DATA COMPONENT.</div>`;
+                        return;
+                    }
+
+                    snapshot.forEach((doc) => {
+                        const msg = doc.data();
+                        
+                        // Parse timestamp markers arrays to implement central timeline divider elements
+                        if(msg.timestamp) {
+                            const dateObj = msg.timestamp.toDate();
+                            const humanDateStr = dateObj.toLocaleDateString([], { month: 'long', day: 'numeric', year: 'numeric' });
+                            
+                            if(humanDateStr !== primaryDateCacheHeaderStr) {
+                                primaryDateCacheHeaderStr = humanDateStr;
+                                const dividerNode = document.createElement('div');
+                                dividerNode.className = 'central-date-divider';
+                                dividerNode.innerHTML = `<span class="date-ribbon-tag">${humanDateStr}</span>`;
+                                arenaBox.appendChild(dividerNode);
+                            }
+                        }
+
+                        // Generate Message Structure Element Layout Components Maps
+                        const rowTypeClass = (msg.senderId === currentUser.username) ? 'outgoing-type' : 'incoming-type';
+                        const messageRow = document.createElement('div');
+                        messageRow.className = `msg-row-container ${rowTypeClass}`;
+
+                        let timeLabel = "...";
+                        if(msg.timestamp) {
+                            timeLabel = msg.timestamp.toDate().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                        }
+
+                        // Check structural configuration rules for multi-identity rendering requirements
+                        let identityHeaderMarkup = "";
+                        const parentRoomRef = globalChatsListCache.find(r => r.id === roomId);
+                        if(parentRoomRef && parentRoomRef.type === 'group' && msg.senderId !== currentUser.username) {
+                            identityHeaderMarkup = `<span class="group-sender-identity neon-text-pink">> ${msg.senderId.toUpperCase()}</span>`;
+                        }
+
+                        // Analyze dynamic structural configuration rules for Media Elements Payload Assets Map
+                        let mediaMarkup = "";
+                        if(msg.mediaUrl) {
+                            if(msg.mediaType === 'image') {
+                                mediaMarkup = `<div class="bubble-media-wrapper" onclick="window.open('${msg.mediaUrl}','_blank')"><img src="${msg.mediaUrl}" alt="Attachment Component"></div>`;
+                            } else if(msg.mediaType === 'video') {
+                                mediaMarkup = `<div class="bubble-media-wrapper"><video src="${msg.mediaUrl}" controls></video></div>`;
+                            }
+                        }
+
+                        let doubleTickMarkup = (rowTypeClass === 'outgoing-type') ? `<i class="fa-solid fa-check-double double-tick-icon"></i>` : '';
+
+                        messageRow.innerHTML = `
+                            <div class="bubble-wrapper">
+                                ${identityHeaderMarkup}
+                                ${mediaMarkup}
+                                ${msg.text ? `<div class="msg-bubble-core">${escapeHTML_StringSanitizer(msg.text)}</div>` : ''}
+                                <div class="msg-meta-timestamp-line">
+                                    <span>${timeLabel}</span>
+                                    ${doubleTickMarkup}
+                                </div>
+                            </div>
+                        `;
+
+                        arenaBox.appendChild(messageRow);
+                    });
+
+                    // Instantly shift view frames focus targeting base bottom element boundary lines
+                    arenaBox.scrollTop = arenaBox.scrollHeight;
+
+                }, (error) => {
+                    // Critical Catch Index Error Auto Bypass Fallback Engine Protocol
+                    if(error.message.includes('index')) {
+                        // Fallback tracking mapping implementation strategy execution block
+                        executeUnindexedFallbackQueryRender(roomId);
+                    } else {
+                        showCryptoToast(`STREAM CRITICAL ERROR FAILURE: ${error.message}`);
+                    }
+                });
+        }
+
+        function executeUnindexedFallbackQueryRender(roomId) {
+            const arenaBox = document.getElementById('realtime-message-board-container');
+            db.collection("messages")
+                .where("chatId", "==", roomId)
+                .onSnapshot((snapshot) => {
+                    arenaBox.innerHTML = '';
+                    let unsortedDocs = [];
+                    snapshot.forEach(d => unsortedDocs.push(d.data()));
+                    
+                    // Native JavaScript Engine Array Allocation Core Sorting Algorithm Processing Strategy
+                    unsortedDocs.sort((a, b) => (a.timestamp?.toMillis() || 0) - (b.timestamp?.toMillis() || 0));
+
+                    unsortedDocs.forEach(msg => {
+                        const rowTypeClass = (msg.senderId === currentUser.username) ? 'outgoing-type' : 'incoming-type';
+                        const messageRow = document.createElement('div');
+                        messageRow.className = `msg-row-container ${rowTypeClass}`;
+                        
+                        messageRow.innerHTML = `
+                            <div class="bubble-wrapper">
+                                <div class="msg-bubble-core">${escapeHTML_StringSanitizer(msg.text || '')}</div>
+                            </div>
+                        `;
+                        arenaBox.appendChild(messageRow);
+                    });
+                    arenaBox.scrollTop = arenaBox.scrollHeight;
+                });
+        }
+
+        // =========================================================================
+        // 🚀 CONTEXTUAL MESSAGE TRANSMISSION SYSTEM ENGINE
+        // =========================================================================
+        async function commitMessagePayloadTransmission(textValue, mediaUrl = null, mediaType = null) {
+            if(!currentChatId) return;
+            if(!textValue.trim() && !mediaUrl) return;
+
+            const payloadPacket = {
+                chatId: currentChatId,
+                senderId: currentUser.username,
+                text: textValue,
+                mediaUrl: mediaUrl,
+                mediaType: mediaType,
+                timestamp: firebase.firestore.FieldValue.serverTimestamp()
+            };
+
+            let trackingPreviewStringStr = textValue;
+            if(!textValue && mediaUrl) trackingPreviewStringStr = "⚡ Interactive Media Component";
+
+            try {
+                // Concurrently dispatch tracking tasks records documents allocations actions
+                await db.collection("messages").add(payload Packet);
+                
+                // Realtime synchronization database engine interface pointers mapping updates update
+                await db.collection("chats").doc(currentChatId).update({
+                    lastMessage: trackingPreviewStringStr,
+                    lastUpdated: firebase.firestore.FieldValue.serverTimestamp()
+                });
+            } catch(err) {
+                showCryptoToast(`TRANSMISSION DROP ERROR: ${err.message}`);
+            }
+        }
+
+        // Event Interceptor Registration Link Hooks UI Submit Click Elements
+        document.getElementById('payload-transmission-submit-btn').addEventListener('click', executeTextTransmissionSequence);
+        document.getElementById('payload-message-input').addEventListener('keydown', (e) => {
+            if(e.key === 'Enter') executeTextTransmissionSequence();
+        });
+
+        function executeTextTransmissionSequence() {
+            const inputField = document.getElementById('payload-message-input');
+            const dataStr = inputField.value;
+            if(!dataStr.trim()) return;
+
+            inputField.value = ''; // Instantly release UI control blocks buffers
+            commitMessagePayloadTransmission(dataStr);
+        }
+
+        // =========================================================================
+        // ☁️ CHAPTER 4.4: CLOUDINARY STORAGE REST FETCH TRANSMISSION GATEWAY
+        // =========================================================================
+        document.getElementById('attachment-click-trigger').addEventListener('click', () => {
+            document.getElementById('hidden-media-payload-uploader').click();
+        });
+
+        document.getElementById('hidden-media-payload-uploader').addEventListener('change', async (e) => {
+            const fileRef = e.target.files[0];
+            if(!fileRef) return;
+
+            // Resolve operational dynamic parameter validations metrics attributes checks
+            const fileTypeGroupStr = fileRef.type.split('/')[0]; // Yield allocation: 'image' or 'video'
+            if(fileTypeGroupStr !== 'image' && fileTypeGroupStr !== 'video') {
+                showCryptoToast("INVALID BINARY DATA MATRIX FORMAT TYPE CODE REJECTED.");
+                return;
+            }
+
+            try {
+                showCryptoToast("TRANSMITTING LARGE ATTACHMENT BLOB ASSETS PACKET TO CLOUD...");
+                
+                // Build execution schema container forms references
+                const dataUploaderForm = new FormData();
+                dataUploaderForm.append("file", fileRef);
+                dataUploaderForm.append("upload_preset", CLOUDINARY_PRESET);
+
+                // Run Native JavaScript XML Fetch Request Architecture Operation Engine
+                const restApiResponse = await fetch(CLOUDINARY_URL, {
+                    method: "POST",
+                    body: dataUploaderForm
+                });
+
+                if(!restApiResponse.ok) throw new Error("REST ENDPOINT BUFFER ACCESS DENIED FAULT");
+
+                const processingResultJson = await restApiResponse.json();
+                const secureCloudAssetUrl = processingResultJson.secure_url;
+
+                // Transmit resolved resource map items links directly inside Firestore stream network layers
+                await commitMessagePayloadTransmission("", secureCloudAssetUrl, fileTypeGroupStr);
+                showCryptoToast("ATTACHMENT STRUCTURAL PAYLOAD LINK DISPATCH COMPLETED.");
+            } catch(error) {
+                showCryptoToast(`CLOUDINARY TRANSMISSION INTERRUPT FAULT: ${error.message}`);
+            } finally {
+                e.target.value = ''; // Purge native element buffer cache pointers allocation records
+            }
+        });
+
+        // =========================================================================
+        // 🎛️ CHAPTER 4.5: PROFILE SYNCHRONIZATION AND CONTEXT CONTROL OPERATORS
+        // =========================================================================
+        document.getElementById('profile-update-crypto-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const alteredName = document.getElementById('profile-name-input-node').value.trim();
+            const imageFileObj = document.getElementById('profile-avatar-file-node').files[0];
+            const updatedPassToken = document.getElementById('profile-password-input-node').value;
+
+            if(!alteredName) { showCryptoToast("IDENTITY PARAMETER RECORD IS REQUIRED."); return; }
+
+            try {
+                showCryptoToast("COMMITTING SYNCHRONIZATION DATA PACKETS TO DATA MAINFRAME...");
+                let remoteResolvedAvatarUrl = currentUser.profilePic;
+
+                // Process intermediate Image Upload assets transitions cycles if required
+                if(imageFileObj) {
+                    const dataUploaderForm = new FormData();
+                    dataUploaderForm.append("file", imageFileObj);
+                    dataUploaderForm.append("upload_preset", CLOUDINARY_PRESET);
+                    
+                    const res = await fetch(CLOUDINARY_URL, { method: "POST", body: dataUploaderForm });
+                    if(res.ok) {
+                        const json = await res.json();
+                        remoteResolvedAvatarUrl = json.secure_url;
+                    }
+                }
+
+                // Push structural updates actions into targeted Firestore Node Document Index positions
+                await db.collection("users").doc(currentUser.uid).update({
+                    name: alteredName,
+                    profilePic: remoteResolvedAvatarUrl
+                });
+
+                // Update operational authentication cipher references strings configurations rules parameters checks
+                if(updatedPassToken.trim()) {
+                    await auth.currentUser.updatePassword(updatedPassToken);
+                }
+
+                // Update locally cached execution cache parameters map properties references values objects
+                currentUser.name = alteredName;
+                currentUser.profilePic = remoteResolvedAvatarUrl;
+                
+                // Force operational dynamic updates updates transformations rules deployment metrics interfaces configurations
+                initializeDashboardInterface();
+                
+                // Terminate visibility of contextual modal processing environments frames
+                document.getElementById('profile-customizer-modal-layer').classList.remove('open');
+                showCryptoToast("PROFILE CONFIGURATION SYNC PIPELINE COMMITTED SUCCESS.");
+            } catch(err) {
+                showCryptoToast(`SYNCHRONIZE PROTOCOL FAILURE FAULT: ${err.message}`);
+            }
+        });
+
+        // Context Drops Controls Interceptors Handling Bindings Elements Configuration Operations Actions
+        document.getElementById('channel-dropdown-trigger').addEventListener('click', () => {
+            document.getElementById('channel-context-menu-list').classList.toggle('show');
+        });
+        
+        document.getElementById('ctx-clear-chat-btn').addEventListener('click', async () => {
+            document.getElementById('channel-context-menu-list').classList.remove('show');
+            if(!currentChatId) return;
+            if(confirm("// UNREVERSIBLE DESTRUCTION WARNING: PURGE ALL DATA MESSAGE BLOCKS INSIDE LOGS SECTOR CHANNEL?")) {
+                try {
+                    const messagesSnapshot = await db.collection("messages").where("chatId", "==", currentChatId).get();
+                    const destructionBatch = db.batch();
+                    messagesSnapshot.docs.forEach(doc => destructionBatch.delete(doc.ref));
+                    await destructionBatch.commit();
+                    
+                    await db.collection("chats").doc(currentChatId).update({ lastMessage: "// DATA REINITIALIZED MATRIX LOG CLEAR" });
+                    showCryptoToast("CHANNEL TRANSMISSION MATRIX HISTORY SCRUBBED AND DELETED.");
+                } catch(error) { showCryptoToast(`CLEANUP SEQUENCE REFUSED FAULT: ${error.message}`); }
+            }
+        });
+
+        document.getElementById('ctx-block-node-btn').addEventListener('click', () => {
+            document.getElementById('channel-context-menu-list').classList.remove('show');
+            showCryptoToast("BLOCK COMMAND INTERACT RETURNING SUCCESS PROCESS TRACE STATUS STABLE.");
+        });
+
+        // =========================================================================
+        // 🛡️ CHAPTER 4.6: ISOLATED MULTI-INSTANCE ADMIN CORE ENGINES PIPELINES
+        // =========================================================================
+        document.getElementById('admin-task-selector').addEventListener('change', (e) => {
+            const chosenTaskOption = e.target.value;
+            if(chosenTaskOption === 'provision-user') {
+                document.getElementById('sub-frame-provision-user-node').style.display = 'block';
+                document.getElementById('sub-frame-forge-group-node').style.display = 'none';
+            } else {
+                document.getElementById('sub-frame-provision-user-node').style.display = 'none';
+                document.getElementById('sub-frame-forge-group-node').style.display = 'block';
+            }
+        });
+
+        document.getElementById('admin-user-provision-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const admUser = document.getElementById('adm-username').value.trim().toLowerCase();
+            const admName = document.getElementById('adm-fullname').value.trim();
+            const admRole = document.getElementById('adm-role').value;
+            const admPass = document.getElementById('adm-password').value;
+
+            try {
+                showCryptoToast("SPAWNING ISOLATED ISOLATED INSTANCE SECONDARY CORE ENGINE SYSTEM ATOM...");
+                
+                // Instantiate clean runtime secondary core interface mapping references to bypass auth session swapping
+                const secondaryIsolatedAppInstance = firebase.initializeApp(firebaseConfig, "SecondaryEngineInstanceWorkerThread");
+                
+                // Execute user account token allocations tasks directly targeting remote storage matrix nodes structures
+                const userCredentialResultRecord = await secondaryIsolatedAppInstance.auth().createUserWithEmailAndPassword(`${admUser}@chatplus.com`, admPass);
+                const assignedTargetUid = userCredentialResultRecord.user.uid;
+
+                // Build User Configuration Map Data directly referencing generated indices values allocations records keys
+                await db.collection("users").doc(assignedTargetUid).set({
+                    name: admName,
+                    username: admUser,
+                    role: admRole,
+                    profilePic: ""
+                });
+
+                // Automated Private One-To-One Encrypted Vector Data Channel Initialization Routine Setup Implementation Sequence
+                const mutualAutomaticVerificationRoomPayloadId = await db.collection("chats").add({
+                    name: null,
+                    pic: null,
+                    type: "direct",
+                    members: [currentUser.username, admUser],
+                    lastMessage: "⚡ MAINFRAME ESTABLISHED CONTROL ROOT SECURITY LINK PROTOCOL ACTIVE",
+                    lastUpdated: firebase.firestore.FieldValue.serverTimestamp()
+                });
+
+                showCryptoToast(`PROVISION SUCCESS: NODE AUTH CREATED FOR [${admUser}]. DESTROYING WORKER APPS SECTORS...`);
+                
+                // Instantly wipe secondary thread allocations memory blocks to preserve resources footprints configurations parameters
+                await secondaryIsolatedAppInstance.delete();
+
+                // Clear layout structures components values placeholders configurations controls strings values maps entries items
+                document.getElementById('admin-user-provision-form').reset();
+                document.getElementById('admin-mainframe-modal-layer').classList.remove('open');
+            } catch(error) {
+                showCryptoToast(`PROVISION FACTORY BLOCK FAILURE INTERRUPT: ${error.message}`);
+            }
+        });
+
+        document.getElementById('admin-group-forge-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const groupTitle = document.getElementById('grp-title').value.trim();
+            const rawMembersString = document.getElementById('grp-members').value;
+
+            try {
+                // Sanitize string expressions maps sequences structures arrays components logic
+                let parsedMembersArray = rawMembersString.split(',')
+                    .map(usernameTokenItem => usernameTokenItem.trim().toLowerCase())
+                    .filter(tokenItemString => tokenItemString.length > 0);
+
+                if(!parsedMembersArray.includes(currentUser.username)) {
+                    parsedMembersArray.push(currentUser.username);
+                }
+
+                showCryptoToast("FORGING MULTIPLEX CHANNELS VECTOR GROUPS COMPONENTS...");
+
+                await db.collection("chats").add({
+                    name: groupTitle,
+                    pic: `https://via.placeholder.com/150/fe019a/ffffff?text=${encodeURIComponent(groupTitle.substring(0,3).toUpperCase())}`,
+                    type: "group",
+                    members: parsedMembersArray,
+                    lastMessage: `// CHANNEL MATRIX FORGED BY SYSTEM ADMINISTRATOR ROOT ROLE NODE`,
+                    lastUpdated: firebase.firestore.FieldValue.serverTimestamp()
+                });
+
+                showCryptoToast("DYNAMIC MULTIPLEX VECTOR CHANNEL GROUPS FORGED SUCCESS.");
+                document.getElementById('admin-group-forge-form').reset();
+                document.getElementById('admin-mainframe-modal-layer').classList.remove('open');
+            } catch(err) {
+                showCryptoToast(`FORGING MAIN PLATFORM REFUSAL CONSOLE FAULT: ${err.message}`);
+            }
+        });
+
+
+        // =========================================================================
+        // 🎨 NATIVE VIEW CONTROLS EVENT HANDLERS REGISTRY INTERFACE
+        // =========================================================================
+        function setupOperationalModalEventHandlers() {
+            // General Native Modal Controls Layout Dismiss Closures Actions Handlers Loops
+            document.querySelectorAll('.close-modal-generic-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    document.getElementById('profile-customizer-modal-layer').classList.remove('open');
+                    document.getElementById('admin-mainframe-modal-layer').classList.remove('open');
+                });
+            });
+
+            // Trigger Launch Action Configurations Target Maps Items Selectors
+            document.getElementById('profile-edit-trigger').addEventListener('click', () => {
+                document.getElementById('profile-name-input-node').value = currentUser.name;
+                document.getElementById('profile-password-input-node').value = '';
+                document.getElementById('profile-customizer-modal-layer').classList.add('open');
+            });
+
+            document.getElementById('admin-panel-trigger').addEventListener('click', () => {
+                document.getElementById('admin-mainframe-modal-layer').classList.add('open');
+            });
+
+            document.getElementById('system-logout-btn').addEventListener('click', () => {
+                if(confirm("// INITIALIZE SEVER SESSION SEQUENCES CONSOLE LOGOUT TERMINATION ORDER?")) {
+                    auth.signOut();
+                }
+            });
+
+            // Mobile Device Dynamic Layout Screen Component Router Back Interface Navigation Actions Trigger Click Controller Elements
+            document.getElementById('mobile-back-vector-btn').addEventListener('click', () => {
+                currentChatId = null; // Purge active reference index targets parameter indicators records keys
+                document.body.classList.remove('chat-active-mode');
+            });
+
+            // Search filtering node operations sequence algorithm block deployment implementation strategy
+            document.getElementById('node-search-field').addEventListener('input', (e) => {
+                const searchStringQueryValue = e.target.value.toLowerCase().trim();
+                const nodeItemsRowsList = document.querySelectorAll('.chat-item-node');
+                
+                nodeItemsRowsList.forEach(itemCardNode => {
+                    const nodeInnerTitleNameTextStr = itemCardNode.querySelector('.node-name').innerText.toLowerCase();
+                    if(nodeInnerTitleNameTextStr.includes(searchStringQueryValue)) {
+                        itemCardNode.style.display = 'flex';
+                    } else {
+                        itemCardNode.style.display = 'none';
+                    }
+                });
+            });
+
+            // Close persistent tracking layers configurations interface states dropdown contexts click outside areas captures triggers handlers hooks
+            window.addEventListener('click', (e) => {
+                if(!e.target.matches('#channel-dropdown-trigger') && !e.target.closest('#channel-context-menu-list')) {
+                    document.getElementById('channel-context-menu-list').classList.remove('show');
+                }
+            });
+        }
+
+        // Helper Security Anti-Glitch Cross-Site HTML Characters Insertion Escaper Encoder Method Function
+        function escapeHTML_StringSanitizer(stringParam) {
+            const htmlEscaperMapEntities = {
+                '&': '&amp;',
+                '<': '&lt;',
+                '>': '&gt;',
+                '"': '&quot;',
+                "'": '&#x27;',
+                '/': '&#x2F;'
+            };
+            return String(stringParam).replace(/[&<>"'/]/g, (matchingCharKey) => htmlEscaperMapEntities[matchingCharKey]);
+        }
+    </script>
+</body>
+</html>
