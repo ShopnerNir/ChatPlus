@@ -694,23 +694,26 @@
     </div>
 
     <script>
+        
         // ==========================================
-        // CONFIGURATION PLACEHOLDERS
-        // ==========================================
-        const firebaseConfig = {
-            apiKey: "YOUR_FIREBASE_API_KEY",
-            authDomain: "YOUR_FIREBASE_AUTH_DOMAIN",
-            projectId: "YOUR_FIREBASE_PROJECT_ID",
-            storageBucket: "YOUR_FIREBASE_STORAGE_BUCKET",
-            messagingSenderId: "YOUR_FIREBASE_MESSAGING_SENDER_ID",
-            appId: "YOUR_FIREBASE_APP_ID"
-        };
+// ১. ফায়ারবেস ও ক্লাউডিনারি কনফিগারেশন 
+// ==========================================
+const firebaseConfig = {
+    apiKey: "AIzaSyCFylUIK2wByPd70a4xEg2_8QkqY-MP8WM",
+  authDomain: "chatplus-22012026.firebaseapp.com",
+  projectId: "chatplus-22012026",
+  storageBucket: "chatplus-22012026.firebasestorage.app",
+  messagingSenderId: "530474889688",
+  appId: "1:530474889688:web:38e1545f1ee796a4bf42ad"
+};
 
-        const CLOUDINARY_URL = "https://api.cloudinary.com/v1_1/YOUR_CLOUDINARY_CLOUD_NAME/upload";
-        const CLOUDINARY_PRESET = "YOUR_CLOUDINARY_UPLOAD_PRESET";
-
+// Cloudinary Credentials
+const CLOUDINARY_URL = "https://api.cloudinary.com/v1_1/zx82me8y/upload";
+const CLOUDINARY_PRESET = "ChatPlus"; 
+        
+        
         // Initialize Firebase
-        if(firebaseConfig.apiKey !== "YOUR_FIREBASE_API_KEY") {
+        if(firebaseConfig.apiKey !== "AIzaSyCFylUIK2wByPd70a4xEg2_8QkqY-MP8WM") {
             firebase.initializeApp(firebaseConfig);
         }
 
@@ -977,7 +980,7 @@
         // ==========================================
         
         async function uploadToCloudinary(fileObject) {
-            if(CLOUDINARY_URL.includes("YOUR_CLOUDINARY_CLOUD_NAME")) {
+            if(CLOUDINARY_URL.includes("ChatPlus")) {
                 alert("Cloudinary ক্রেডেনশিয়াল সেট করা নেই!");
                 return null;
             }
@@ -1185,7 +1188,7 @@
         // Dynamic Initialization Validation check
         window.addEventListener('DOMContentLoaded', () => {
             setTimeout(() => {
-                if(firebaseConfig.apiKey === "YOUR_FIREBASE_API_KEY") {
+                if(firebaseConfig.apiKey === "AIzaSyCFylUIK2wByPd70a4xEg2_8QkqY-MP8WM") {
                     splashScreen.style.display = 'none';
                     document.body.innerHTML = `
                         <div style="padding:40px; text-align:center; color:#ff019a; font-family:'Orbitron',sans-serif; background:#0b0816; height:100vh; display:flex; flex-direction:column; justify-content:center; align-items:center;">
