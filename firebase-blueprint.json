@@ -1,0 +1,116 @@
+{
+  "entities": {
+    "UserProfile": {
+      "title": "UserProfile",
+      "description": "User profile document stored under /users/{uid}",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string" },
+        "username": { "type": "string" },
+        "email": { "type": "string" },
+        "role": { "type": "string", "enum": ["user", "admin"] },
+        "profilePicture": { "type": "string" },
+        "status": { "type": "string", "enum": ["online", "offline"] },
+        "lastSeen": { "type": "string", "format": "date-time" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "activated": { "type": "boolean" },
+        "allowedChatPartners": { "type": "string" },
+        "wallpaper": { "type": "string" },
+        "theme": { "type": "string" }
+      },
+      "required": ["uid", "username", "email", "role", "profilePicture", "status", "createdAt", "activated"]
+    },
+    "ChatRoom": {
+      "title": "ChatRoom",
+      "description": "Chat room document stored under /chats/{chatId}",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "type": { "type": "string", "enum": ["private", "group"] },
+        "name": { "type": "string" },
+        "picture": { "type": "string" },
+        "description": { "type": "string" },
+        "participants": { "type": "array" },
+        "participantUsernames": { "type": "array" },
+        "lastMessage": { "type": "string" },
+        "lastMessageTime": { "type": "string", "format": "date-time" },
+        "unreadCounts": { "type": "object" },
+        "createdBy": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["id", "type", "participants", "unreadCounts", "createdBy", "createdAt"]
+    },
+    "Message": {
+      "title": "Message",
+      "description": "Individual chat message stored under /chats/{chatId}/messages/{messageId}",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "chatId": { "type": "string" },
+        "senderId": { "type": "string" },
+        "senderUsername": { "type": "string" },
+        "text": { "type": "string" },
+        "type": { "type": "string", "enum": ["text", "image", "video", "audio", "file", "sticker", "gif"] },
+        "mediaUrl": { "type": "string" },
+        "mediaName": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["id", "chatId", "senderId", "senderUsername", "text", "type", "createdAt"]
+    },
+    "Announcement": {
+      "title": "Announcement",
+      "description": "Marquee announcement bar stored under /announcements/{announcementId}",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "text": { "type": "string" },
+        "link": { "type": "string" },
+        "icon": { "type": "string" },
+        "priority": { "type": "string", "enum": ["normal", "important", "urgent"] },
+        "targetType": { "type": "string", "enum": ["all", "user", "group"] },
+        "targetId": { "type": "string" },
+        "active": { "type": "boolean" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "publishedBy": { "type": "string" }
+      },
+      "required": ["id", "text", "icon", "priority", "targetType", "active", "createdAt", "publishedBy"]
+    },
+    "ActivityLog": {
+      "title": "ActivityLog",
+      "description": "Log entry stored under /logs/{logId}",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "userId": { "type": "string" },
+        "username": { "type": "string" },
+        "action": { "type": "string" },
+        "deviceInfo": { "type": "string" },
+        "timestamp": { "type": "string", "format": "date-time" },
+        "type": { "type": "string", "enum": ["login", "admin_action", "system"] }
+      },
+      "required": ["id", "userId", "username", "action", "timestamp", "type"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": "UserProfile",
+      "description": "List of user profiles registered"
+    },
+    "/chats/{chatId}": {
+      "schema": "ChatRoom",
+      "description": "Active conversational channels"
+    },
+    "/chats/{chatId}/messages/{messageId}": {
+      "schema": "Message",
+      "description": "Exchanged message threads"
+    },
+    "/announcements/{announcementId}": {
+      "schema": "Announcement",
+      "description": "System-wide persistent marquees managed by Admins"
+    },
+    "/logs/{logId}": {
+      "schema": "ActivityLog",
+      "description": "Audit trails for logging actions"
+    }
+  }
+}

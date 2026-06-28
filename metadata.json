@@ -1,0 +1,6 @@
+{
+  "name": "ChatPlus",
+  "description": "Complete Professional Real-Time Messaging Web Application with Premium Glassmorphism UI",
+  "requestFramePermissions": ["microphone"],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
