@@ -279,7 +279,7 @@ export default function Sidebar({
           <Search className="w-4 h-4 text-indigo-400 absolute left-4.5 top-1/2 -translate-y-1/2" />
           <input
             type="text"
-            placeholder="আলাপন ও চ্যাটরুম খুঁজুন..."
+            placeholder="সার্চ করুন..."
             value={searchTerm}
             onChange={(e) => onSearchChange(e.target.value)}
             className="w-full bg-slate-950/80 border border-slate-800 hover:border-slate-700 focus:border-indigo-500 rounded-2xl pl-11 pr-4 py-3 text-xs text-white focus:outline-none focus:ring-1 focus:ring-indigo-500/20 font-sans transition-all duration-300 placeholder-slate-500"
@@ -470,7 +470,7 @@ export default function Sidebar({
               {/* Header */}
               <div className="flex justify-between items-center mb-5 border-b border-white/5 pb-3">
                 <h3 className="text-xs font-sans font-black text-indigo-400 uppercase tracking-widest flex items-center gap-2">
-                  <Hash className="w-4 h-4 text-indigo-500" /> নতুন আলাপ শুরু করুন
+                  <Hash className="w-4 h-4 text-indigo-500" /> নতুন চ্যাট শুরু করুন
                 </h3>
                 <button
                   onClick={() => setShowCreateModal(false)}
@@ -491,7 +491,7 @@ export default function Sidebar({
                         : 'bg-slate-950 text-slate-400 border-white/5'
                     }`}
                   >
-                    ব্যক্তিগত আলাপ (DM)
+                    ব্যক্তিগত চ্যাট
                   </button>
                   <button
                     onClick={() => setModalType('group')}
