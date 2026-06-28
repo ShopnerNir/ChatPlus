@@ -16,7 +16,7 @@ export default function LoadingScreen({ onFinished }: LoadingScreenProps) {
       'সিকিউরিটি চাবি এনক্রিপ্ট করা হচ্ছে...',
       'পছন্দসই মোবাইল থিম সেটআপ করা হচ্ছে...',
       'সেশন লগ যাচাই করা হচ্ছে...',
-      'সংযোগ সফল। আলাপন-এ স্বাগতম!',
+      'সংযোগ সফল। সরকার-এ স্বাগতম!',
     ];
 
     const interval = setInterval(() => {
@@ -74,7 +74,7 @@ export default function LoadingScreen({ onFinished }: LoadingScreenProps) {
 
         {/* Title */}
         <h1 className="text-3xl font-black tracking-tight mb-2 font-sans bg-clip-text text-transparent bg-gradient-to-r from-violet-400 via-fuchsia-400 to-pink-400">
-          আলাপন
+          সরকার
         </h1>
         <p className="text-[10px] text-violet-400 font-mono tracking-widest uppercase mb-6 flex items-center justify-center gap-1.5">
           <ShieldCheck className="w-3.5 h-3.5 text-violet-500" /> SECURED SECURE ENGINE
@@ -103,7 +103,7 @@ export default function LoadingScreen({ onFinished }: LoadingScreenProps) {
       {/* Developed by Footer */}
       <div className="text-center pb-4">
         <p className="text-[10px] font-sans text-slate-600 tracking-wider">
-          তৈরি করেছেন: <span className="text-violet-400 font-bold uppercase">উৎসব সরকার</span>
+          Developed by: <span className="text-violet-400 font-bold uppercase">UTSAB SARKER</span>
         </p>
       </div>
     </div>
