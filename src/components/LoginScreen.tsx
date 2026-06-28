@@ -102,7 +102,7 @@ export default function LoginScreen({ onSuccess }: LoginScreenProps) {
       <div className="flex justify-between items-center pt-2 pb-6">
         <div className="flex items-center gap-1.5 text-xs text-violet-400 font-mono">
           <Smartphone className="w-4 h-4 text-violet-500 animate-pulse" />
-          <span>ALAPON MOBILE SECURE v2.0</span>
+          <span>SARKAER MOBILE SECURE v2.0</span>
         </div>
         <div className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse shadow-[0_0_8px_rgba(16,185,129,0.5)]" />
       </div>
@@ -123,7 +123,7 @@ export default function LoginScreen({ onSuccess }: LoginScreenProps) {
           
           <div className="space-y-1.5">
             <h2 className="text-2xl font-sans font-black tracking-tight text-white bg-clip-text">
-              আলাপন (Alapon)
+              সরকার (SARKAER)
             </h2>
             <p className="text-[11px] font-sans text-slate-400 leading-relaxed">
               একটি সম্পূর্ণ গতিশীল ও সুরক্ষিত যোগাযোগের মাধ্যম
@@ -141,7 +141,7 @@ export default function LoginScreen({ onSuccess }: LoginScreenProps) {
             <div className="relative">
               <input
                 type="text"
-                placeholder="যেমন: utsab, rahim"
+                placeholder="🤧🤧🤧"
                 value={username}
                 onChange={(e) => setUsername(e.target.value.replace(/\s+/g, ''))}
                 className="w-full bg-slate-900/60 border border-violet-500/10 hover:border-violet-500/25 focus:border-violet-500 focus:ring-1 focus:ring-violet-500/20 rounded-2xl px-4 py-3 text-xs text-white placeholder-slate-600 font-sans focus:outline-none transition-all duration-300"
@@ -229,7 +229,7 @@ export default function LoginScreen({ onSuccess }: LoginScreenProps) {
           নতুন প্রোফাইল খোলার জন্য আপনার এডমিনের সাহায্য নিন।
         </p>
         <p className="text-[9px] text-slate-600 tracking-wider font-sans uppercase">
-          তৈরি করেছেন: <span className="text-violet-400 font-bold">উৎসব সরকার</span>
+          Developed by: <span className="text-violet-400 font-bold">UTSAB SARKER</span>
         </p>
       </div>
     </div>
